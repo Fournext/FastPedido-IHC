@@ -445,18 +445,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
               const SizedBox(height: 20),
-
-              SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: recommended.length,
-                  itemBuilder: (context, index) {
-                    return _buildProductCard(recommended[index]);
-                  },
-                ),
-              ),
             ],
 
             const SizedBox(height: 80),

@@ -202,11 +202,7 @@ class _OffersScreenState extends State<OffersScreen> {
               ),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.local_offer,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  const Icon(Icons.local_offer, color: Colors.white, size: 40),
                   const SizedBox(height: 12),
                   const Text(
                     '¡Ofertas Increíbles!',
@@ -284,10 +280,12 @@ class _OffersScreenState extends State<OffersScreen> {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Container(
                     width: double.infinity,
-                    color: const Color(0xFFFFE4E4),
+                    color: const Color.fromARGB(255, 254, 254, 254),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Image.asset(
@@ -309,7 +307,10 @@ class _OffersScreenState extends State<OffersScreen> {
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(12),
@@ -359,7 +360,7 @@ class _OffersScreenState extends State<OffersScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Nombre del producto
                   Expanded(
                     child: Text(
@@ -373,9 +374,9 @@ class _OffersScreenState extends State<OffersScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Controles de cantidad y favorito
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -387,7 +388,8 @@ class _OffersScreenState extends State<OffersScreen> {
                               onTap: () {
                                 setState(() {
                                   if (quantity > 0) {
-                                    _productQuantities[productId] = quantity - 1;
+                                    _productQuantities[productId] =
+                                        quantity - 1;
                                   }
                                 });
                               },
@@ -454,7 +456,7 @@ class _OffersScreenState extends State<OffersScreen> {
                             ),
                           ),
                         ),
-                      
+
                       // Botón de favorito
                       GestureDetector(
                         onTap: () {
