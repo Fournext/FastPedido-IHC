@@ -14,7 +14,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, int> _productQuantities = {};
 
   final List<Map<String, dynamic>> categories = [
-    {'name': 'Verduras', 'image': 'assets/images/verduras.png'},
+    {'name': 'Verduras', 'image': 'assets/images/vegetables.png'},
     {'name': 'Carnes', 'image': 'assets/images/carnes.png'},
     {'name': 'Lácteos', 'image': 'assets/images/lacteos.png'},
   ];
@@ -24,7 +24,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {
         'name': 'Lechuga',
         'price': 'Bs. 8.50',
-        'image': 'assets/images/lechuga.png',
+        'image': 'assets/images/lechuga.jpg',
       },
       {
         'name': 'Tomate',
@@ -82,17 +82,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'name': 'Carne molida\nde segunda',
       'price': 'Bs. 53.10',
-      'image': 'assets/images/carne_molida.png',
+      'image': 'assets/images/carnemolidasegunda.png',
     },
     {
       'name': 'Cereal Nestle\nChocapic\n250gr',
       'price': 'Bs. 46.80',
-      'image': 'assets/images/cereal.png',
+      'image': 'assets/images/chocapic.png',
     },
     {
       'name': 'Gaseosa\nCoca Cola de\n3lt',
       'price': 'Bs. 18.00',
-      'image': 'assets/images/coca_cola.png',
+      'image': 'assets/images/cocacola3l.png',
     },
   ];
 
@@ -104,8 +104,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     },
     {
       'name': 'Cereales\nLucky Charms',
-      'price': 'Bs. 69.00',
-      'image': 'assets/images/lucky_charms.png',
+      'price': 'Bs. 177.00',
+      'image': 'assets/images/cereales.png',
     },
     {
       'name': 'Nutella',
@@ -263,8 +263,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 75,
-                            height: 75,
+                            width: 90,
+                            height: 90,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
@@ -282,19 +282,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ],
                             ),
-                            child: ClipOval(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Image.asset(
-                                  category['image'],
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.category,
-                                      size: 40,
-                                      color: Colors.grey[400],
-                                    );
-                                  },
+                            child: Container(
+                              margin: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                              child: ClipOval(
+                                child: Container(
+                                  width: 85,
+                                  height: 85,
+                                  color: Colors.white,
+                                  child: Image.asset(
+                                    category['image'],
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      print('Error loading image: ${category['image']}');
+                                      print('Error details: $error');
+                                      return Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey[100],
+                                        ),
+                                        child: Icon(
+                                          Icons.category,
+                                          size: 35,
+                                          color: Colors.grey[400],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -492,16 +511,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  product['image'],
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.shopping_bag,
-                      size: 50,
-                      color: Colors.grey[400],
-                    );
-                  },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                    ),
+                    child: Image.asset(
+                      product['image'],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        print('🚨 ERROR: No se pudo cargar: ${product['image']}');
+                        print('🔍 Producto: ${product['name']}');
+                        print('⚠️ Error: $error');
+                        return Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[100],
+                          ),
+                          child: Icon(
+                            Icons.shopping_bag,
+                            size: 50,
+                            color: Colors.grey[400],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
