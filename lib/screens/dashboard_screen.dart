@@ -14,9 +14,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, int> _productQuantities = {};
 
   final List<Map<String, dynamic>> categories = [
-    {'name': 'Verduras', 'image': 'assets/images/verduras.png'},
-    {'name': 'Carnes', 'image': 'assets/images/carnes.png'},
-    {'name': 'Lácteos', 'image': 'assets/images/lacteos.png'},
+    {'name': 'Verduras', 'image': 'assets/images/categoria/verduras.png'},
+    {'name': 'Carnes', 'image': 'assets/images/categoria/carnes.png'},
+    {'name': 'Lácteos', 'image': 'assets/images/categoria/lacteos.png'},
   ];
 
   final Map<String, List<Map<String, dynamic>>> productsByCategory = {
@@ -44,36 +44,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ],
     'Carnes': [
       {
-        'name': 'Carne molida',
-        'price': 'Bs. 53.10',
-        'image': 'assets/images/carne_molida.png',
+        'name': 'Carne Molida de Primera',
+        'price': 'Bs. 82.00',
+        'image': 'assets/images/carnes/carnemolida.png',
       },
       {
-        'name': 'Pollo',
-        'price': 'Bs. 45.00',
-        'image': 'assets/images/pollo.png',
+        'name': 'Filete de Pechuga Sofia 1 kg Bandeja',
+        'price': 'Bs. 56.90',
+        'image': 'assets/images/carnes/filete_pollo_1kg.png',
       },
       {
-        'name': 'Cerdo',
-        'price': 'Bs. 38.00',
-        'image': 'assets/images/cerdo.png',
+        'name': 'Picaña Frigor al Vacio kg',
+        'price': 'Bs. 166.00',
+        'image': 'assets/images/carnes/picaña_frigor.png',
+      },
+      {
+        'name': 'Pollo Frial Entero Sofia kg',
+        'price': 'Bs. 24.90',
+        'image': 'assets/images/carnes/pollo_frial.png',
+      },
+      {
+        'name': 'Silpancho kg',
+        'price': 'Bs. 66.00',
+        'image': 'assets/images/carnes/silpancho_procesado.png',
+      },
+      {
+        'name': 'Milanesa de Pollo kg',
+        'price': 'Bs. 66.00',
+        'image': 'assets/images/carnes/milanesa.png',
       },
     ],
     'Lácteos': [
       {
-        'name': 'Leche',
-        'price': 'Bs. 8.50',
-        'image': 'assets/images/leche.png',
+        'name': 'Nueva Leche Pil Deslactosada 800 ml',
+        'price': 'Bs. 9.90',
+        'image': 'assets/images/lacteos/leche_delactosada_pil.png',
       },
       {
-        'name': 'Queso',
+        'name': 'Mantequilla Pil Con Sal 200 gr',
+        'price': 'Bs. 24.50',
+        'image': 'assets/images/lacteos/mamtequilla_pil_conSal_200gr.png',
+      },
+      {
+        'name': 'Dulce de Leche Pil 500 gr',
         'price': 'Bs. 25.00',
-        'image': 'assets/images/queso.png',
+        'image': 'assets/images/lacteos/dulce_leche_pil.png',
       },
       {
-        'name': 'Yogurt',
-        'price': 'Bs. 12.00',
-        'image': 'assets/images/yogurt.png',
+        'name': 'Yogurt Pil Bebible Frutilla 1 L',
+        'price': 'Bs. 16.90',
+        'image': 'assets/images/lacteos/yogurt_bebible_1lt.png',
+      },
+      {
+        'name': 'Yogurt Griego Delizia Sabor Fresa 170 gr',
+        'price': 'Bs. 9.30',
+        'image': 'assets/images/lacteos/yogurt_griego.png',
+      },
+      {
+        'name': 'Queso San German Yapacani un',
+        'price': 'Bs. 75.00',
+        'image': 'assets/images/lacteos/queso_yapacani.png',
       },
     ],
   };
@@ -263,8 +293,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 75,
-                            height: 75,
+                            width: 90,
+                            height: 90,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
@@ -284,17 +314,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             child: ClipOval(
                               child: Padding(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(4), // antes 12
                                 child: Image.asset(
                                   category['image'],
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.category,
-                                      size: 40,
-                                      color: Colors.grey[400],
-                                    );
-                                  },
+                                  fit: BoxFit.cover, // cambia a cover
                                 ),
                               ),
                             ),
@@ -495,20 +518,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  product['image'],
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.shopping_bag,
-                      size: 50,
-                      color: Colors.grey[400],
-                    );
-                  },
-                ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                product['image'],
+                fit: BoxFit.cover, // llena todo el espacio
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.shopping_bag,
+                    size: 60,
+                    color: Colors.grey[400],
+                  );
+                },
               ),
             ),
           ),
