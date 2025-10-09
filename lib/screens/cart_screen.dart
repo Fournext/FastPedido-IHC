@@ -46,13 +46,13 @@ class _CartScreenState extends State<CartScreen> {
       'image': 'assets/images/carne_molida.png',
     },
     {
-      'name': 'Jugo liquido\npara de 3lts',
-      'price': 'Bs. 18.00',
-      'image': 'assets/images/jugo.png',
+      'name': 'Jugo Aquarius Pera 3 L',
+      'price': 'Bs. 20.00',
+      'image': 'assets/images/aquario.png',
     },
     {
-      'name': 'Detergente en\npolvo todo\ncolor floral',
-      'price': 'Bs. 21.70',
+      'name': 'Detergente Polvo Omo Limon 1800 gr',
+      'price': 'Bs. 59.90',
       'image': 'assets/images/detergente.png',
     },
   ];
@@ -305,29 +305,37 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         children: [
-          // Imagen del producto
+          // Imagen del producto (más grande y centrada)
           Container(
-            width: 60,
-            height: 60,
+            width: 90, // antes 60
+            height: 90, // antes 60
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 6,
+                ),
+              ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 item['image'],
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(
                     Icons.shopping_bag,
-                    size: 30,
+                    size: 50,
                     color: Colors.grey[400],
                   );
                 },
               ),
             ),
           ),
+
           const SizedBox(width: 12),
           // Información del producto
           Expanded(
@@ -465,23 +473,23 @@ class _CartScreenState extends State<CartScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  product['image'],
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.shopping_bag,
-                      size: 50,
-                      color: Colors.grey[400],
-                    );
-                  },
-                ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                product['image'],
+                fit: BoxFit.cover, // llena toda la tarjeta
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.shopping_bag,
+                    size: 60,
+                    color: Colors.grey[400],
+                  );
+                },
               ),
             ),
           ),
+
           const SizedBox(height: 6),
           Text(
             product['price'],
