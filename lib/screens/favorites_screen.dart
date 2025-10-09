@@ -162,17 +162,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildBottomNavItem(Icons.favorite, 'Favoritos', true, () {
-                Navigator.pop(context);
+                // Ya estamos en favoritos, no hacer nada
               }),
               _buildBottomNavItem(Icons.motorcycle, 'Delivery', false, () {
-                Navigator.pushNamed(context, '/orders');
+                Navigator.pushReplacementNamed(context, '/orders');
               }),
               _buildBottomNavItem(
                 Icons.shopping_cart_outlined,
                 'Carrito',
                 false,
                 () {
-                  Navigator.pushNamed(context, '/cart');
+                  Navigator.pushReplacementNamed(context, '/cart');
                 },
                 badge: _cartItemCount,
               ),
@@ -191,14 +191,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -343,6 +349,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.red : Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,

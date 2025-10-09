@@ -474,14 +474,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       margin: EdgeInsets.only(right: fullWidth ? 0 : 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -641,6 +647,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         decoration: BoxDecoration(
           color: Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,
