@@ -24,22 +24,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {
         'name': 'Lechuga',
         'price': 'Bs. 8.50',
-        'image': 'assets/images/lechuga.png',
+        'image': 'assets/images/verduras/lechuga.jpg',
       },
       {
         'name': 'Tomate',
         'price': 'Bs. 6.00',
-        'image': 'assets/images/tomate.png',
+        'image': 'assets/images/verduras/tomate.png',
       },
       {
         'name': 'Zanahoria',
         'price': 'Bs. 5.50',
-        'image': 'assets/images/zanahoria.png',
+        'image': 'assets/images/verduras/zanahoria.png',
       },
       {
         'name': 'Cebolla',
         'price': 'Bs. 4.00',
-        'image': 'assets/images/cebolla.png',
+        'image': 'assets/images/verduras/cebolla.png',
       },
     ],
     'Carnes': [
@@ -112,17 +112,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'name': 'Carne molida\nde segunda',
       'price': 'Bs. 53.10',
-      'image': 'assets/images/carne_molida.png',
+      'image': 'assets/images/ofertas/carnemolidasegunda.png',
     },
     {
       'name': 'Cereal Nestle\nChocapic\n250gr',
       'price': 'Bs. 46.80',
-      'image': 'assets/images/cereal.png',
+      'image': 'assets/images/ofertas/chocapic.png',
     },
     {
       'name': 'Gaseosa\nCoca Cola de\n3lt',
       'price': 'Bs. 18.00',
-      'image': 'assets/images/coca_cola.png',
+      'image': 'assets/images/ofertas/cocacola3l.png',
     },
   ];
 
@@ -130,17 +130,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'name': 'Cerveza\nPaceña Lata\n269 ml CBX',
       'price': 'Bs. 7.40',
-      'image': 'assets/images/cerveza.png',
+      'image': 'assets/images/recomendacion/cerveza.png',
     },
     {
       'name': 'Cereales\nLucky Charms',
       'price': 'Bs. 69.00',
-      'image': 'assets/images/lucky_charms.png',
+      'image': 'assets/images/recomendacion/cereales.png',
     },
     {
       'name': 'Nutella',
       'price': 'Bs. 176.00',
-      'image': 'assets/images/nutella.png',
+      'image': 'assets/images/recomendacion/nutella.png',
     },
   ];
 
