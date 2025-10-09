@@ -9,9 +9,13 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String? _selectedCategory;
-  int _cartItemCount = 2;
   Set<String> _favoriteProducts = {};
   Map<String, int> _productQuantities = {};
+
+  // Calculamos dinámicamente el número de items en el carrito
+  int get _cartItemCount {
+    return _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  }
 
   final List<Map<String, dynamic>> categories = [
     {'name': 'Verduras', 'image': 'assets/images/categoria/verduras.png'},
@@ -401,14 +405,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildBottomNavItem(Icons.favorite_border, 'Favoritos', () {
-                Navigator.pushNamed(context, '/favorites');
+                // Preparar productos favoritos del dashboard con sus datos completos
+                List<Map<String, dynamic>> dashboardFavoritesToSend = [];
+                _collectFavoriteProducts(offers, dashboardFavoritesToSend);
+                _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
+
+                if (_selectedCategory != null) {
+                  final products = productsByCategory[_selectedCategory] ?? [];
+                  _collectFavoriteProducts(products, dashboardFavoritesToSend);
+                }
+
+                Navigator.pushNamed(
+                  context,
+                  '/favorites',
+                  arguments: {
+                    'dashboardFavorites': _favoriteProducts.toList(),
+                    'dashboardFavoriteProducts': dashboardFavoritesToSend,
+                  },
+                );
               }),
               _buildBottomNavItem(Icons.motorcycle, 'Delivery', () {
                 Navigator.pushNamed(context, '/orders');
               }),
-              _buildBottomNavItem(Icons.shopping_cart_outlined, 'Carrito', () {
-                Navigator.pushNamed(context, '/cart');
-              }, badge: _cartItemCount),
+              _buildBottomNavItem(
+                Icons.shopping_cart_outlined,
+                'Carrito',
+                () {
+                  _navigateToCart();
+                },
+                badge: _cartItemCount > 0 ? _cartItemCount : null,
+              ),
             ],
           ),
         ),
@@ -611,6 +637,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     setState(() {
                       _productQuantities[productId] = 1;
                     });
+                    // Mostrar confirmación
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product['name']} agregado al carrito'),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(7),
@@ -643,6 +677,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _favoriteProducts.add(productId);
                     }
                   });
+                  // Mostrar confirmación
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isFavorite
+                            ? '${product['name']} eliminado de favoritos'
+                            : '${product['name']} agregado a favoritos',
+                      ),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: isFavorite ? Colors.red : Colors.green,
+                    ),
+                  );
                 },
                 child: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -690,7 +736,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.green,
+                    color: Color(
+                      0xFFFF9800,
+                    ), // Color naranja/amarillo como en la imagen
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -713,5 +761,103 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  void _navigateToCart() {
+    // Preparar los productos del dashboard para enviar al carrito
+    List<Map<String, dynamic>> dashboardProducts = [];
+    List<Map<String, dynamic>> dashboardFavoritesToSend = [];
+
+    // Recopilar productos favoritos del dashboard con sus datos completos
+    _collectFavoriteProducts(offers, dashboardFavoritesToSend);
+    _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
+
+    if (_selectedCategory != null) {
+      final products = productsByCategory[_selectedCategory] ?? [];
+      _collectFavoriteProducts(products, dashboardFavoritesToSend);
+    }
+
+    // Revisar ofertas con cantidades
+    for (var offer in offers) {
+      final productId = '${offer['name']}_${offer['price']}';
+      final quantity = _productQuantities[productId] ?? 0;
+      if (quantity > 0) {
+        dashboardProducts.add({
+          'name': offer['name'],
+          'pricePerUnit': offer['price'],
+          'totalPrice': offer['price'], // Se calculará en el carrito
+          'image': offer['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Revisar recomendados con cantidades
+    for (var recommended in recommended) {
+      final productId = '${recommended['name']}_${recommended['price']}';
+      final quantity = _productQuantities[productId] ?? 0;
+      if (quantity > 0) {
+        dashboardProducts.add({
+          'name': recommended['name'],
+          'pricePerUnit': recommended['price'],
+          'totalPrice': recommended['price'], // Se calculará en el carrito
+          'image': recommended['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Revisar productos de categorías con cantidades
+    if (_selectedCategory != null) {
+      final products = productsByCategory[_selectedCategory] ?? [];
+      for (var product in products) {
+        final productId = '${product['name']}_${product['price']}';
+        final quantity = _productQuantities[productId] ?? 0;
+        if (quantity > 0) {
+          dashboardProducts.add({
+            'name': product['name'],
+            'pricePerUnit': product['price'],
+            'totalPrice': product['price'], // Se calculará en el carrito
+            'image': product['image'],
+            'id': productId,
+            'quantity': quantity,
+          });
+        }
+      }
+    }
+
+    // Navegar al carrito con los productos
+    Navigator.pushNamed(
+      context,
+      '/cart',
+      arguments: {
+        'dashboardProducts': dashboardProducts,
+        'dashboardFavoriteProducts': dashboardFavoritesToSend,
+      },
+    );
+
+    // Limpiar las cantidades del dashboard después de enviar al carrito
+    setState(() {
+      _productQuantities.clear();
+    });
+  }
+
+  void _collectFavoriteProducts(
+    List<Map<String, dynamic>> productList,
+    List<Map<String, dynamic>> favoritesToSend,
+  ) {
+    for (var product in productList) {
+      final productId = '${product['name']}_${product['price']}';
+      if (_favoriteProducts.contains(productId)) {
+        favoritesToSend.add({
+          'name': product['name'],
+          'price': product['price'],
+          'image': product['image'],
+          'id': productId,
+        });
+      }
+    }
   }
 }

@@ -14,6 +14,8 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
   int selectedMinute = 0;
   bool showTimeSelector = false;
 
+  double? _totalAmount;
+
   // Controladores para los campos de tiempo
   late TextEditingController _hourController;
   late TextEditingController _minuteController;
@@ -27,6 +29,15 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
     _minuteController = TextEditingController(
       text: selectedMinute.toString().padLeft(2, '0'),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener el total pasado desde la pantalla anterior
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _totalAmount = arguments?['totalAmount'];
   }
 
   @override
@@ -79,7 +90,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Select date',
+                            'Seleccionar fecha',
                             style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                           IconButton(
@@ -146,7 +157,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
                       // Días de la semana
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+                        children: ['D', 'L', 'Ma', 'Mi', 'J', 'V', 'S']
                             .map(
                               (day) => SizedBox(
                                 width: 40,
@@ -181,7 +192,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
                               });
                             },
                             child: const Text(
-                              'Clear',
+                              'Limpiar',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey,
@@ -236,7 +247,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Enter time',
+                      'Ingresar hora',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 20),
@@ -252,7 +263,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
                             });
                           },
                           child: const Text(
-                            'Cancel',
+                            'Cancelar',
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         ),
@@ -443,7 +454,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
               ),
             ),
             const Text(
-              'Hour',
+              'Hora',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             GestureDetector(
@@ -483,7 +494,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
               ),
             ),
             const Text(
-              'Minute',
+              'Minuto',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             GestureDetector(
@@ -511,27 +522,27 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
 
   String _formatSelectedDate(DateTime date) {
     const List<String> months = [
-      'Jan',
+      'Ene',
       'Feb',
       'Mar',
-      'Apr',
+      'Abr',
       'May',
       'Jun',
       'Jul',
-      'Aug',
+      'Ago',
       'Sep',
       'Oct',
       'Nov',
-      'Dec',
+      'Dic',
     ];
     const List<String> weekdays = [
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
+      'Lun',
+      'Mar',
+      'Mié',
+      'Jue',
+      'Vie',
+      'Sáb',
+      'Dom',
     ];
 
     String weekday = weekdays[date.weekday - 1];
@@ -542,18 +553,18 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
 
   String _formatMonthYear(DateTime date) {
     const List<String> months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
 
     return '${months[date.month - 1]} ${date.year}';
@@ -582,7 +593,11 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/billing-details');
+                Navigator.pushNamed(
+                  context,
+                  '/billing-details',
+                  arguments: {'totalAmount': _totalAmount},
+                );
               },
               child: const Text('Continuar'),
             ),

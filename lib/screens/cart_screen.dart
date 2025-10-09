@@ -8,36 +8,18 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int _cartItemCount = 3;
-  Map<String, int> _cartQuantities = {
-    'Coca Cola de 2L Descartable': 2,
-    'Pollo Sofia': 1,
-    'Manzana Roja': 1,
-  };
+  Map<String, int> _cartQuantities = {};
 
-  final List<Map<String, dynamic>> cartItems = [
-    {
-      'name': 'Coca Cola de 2L\nDescartable',
-      'pricePerUnit': 'Bs 18.00 c/u',
-      'totalPrice': 'Bs 54.00',
-      'image': 'assets/images/coca_cola.png',
-      'id': 'Coca Cola de 2L Descartable',
-    },
-    {
-      'name': 'Pollo Sofia',
-      'pricePerUnit': 'Bs 23.00 x Kilo',
-      'totalPrice': 'Bs 46.00',
-      'image': 'assets/images/pollo.png',
-      'id': 'Pollo Sofia',
-    },
-    {
-      'name': 'Manzana Roja',
-      'pricePerUnit': 'Bs 14.00 x Kilo',
-      'totalPrice': 'Bs 28.00',
-      'image': 'assets/images/manzana.png',
-      'id': 'Manzana Roja',
-    },
-  ];
+  // Variables para manejar las sugerencias
+  Set<String> _favoriteSuggestions = {};
+  Map<String, int> _suggestionQuantities = {};
+
+  List<Map<String, dynamic>> cartItems = [];
+
+  // Calculamos dinámicamente el número de items en el carrito
+  int get _cartItemCount {
+    return _cartQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  }
 
   final List<Map<String, dynamic>> suggestions = [
     {
@@ -59,11 +41,134 @@ class _CartScreenState extends State<CartScreen> {
 
   double get totalAmount {
     double total = 0.0;
+
+    // Calcular total de productos en el carrito principal
     for (var item in cartItems) {
-      String priceStr = item['totalPrice'].replaceAll('Bs ', '');
-      total += double.parse(priceStr);
+      final quantity = _cartQuantities[item['id']] ?? 0;
+      if (quantity > 0) {
+        // Extraer el precio unitario del campo pricePerUnit
+        double unitPrice = _extractPrice(item['pricePerUnit']);
+        total += unitPrice * quantity;
+      }
     }
+
     return total;
+  }
+
+  // Función para extraer el precio numérico de un string con formato "Bs. XX.XX"
+  double _extractPrice(String priceString) {
+    // Buscar números con punto decimal
+    RegExp regExp = RegExp(r'\d+\.?\d*');
+    Match? match = regExp.firstMatch(priceString);
+    if (match != null) {
+      String numberStr = match.group(0)!;
+      return double.tryParse(numberStr) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Procesar productos enviados desde el dashboard
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (arguments != null && arguments['dashboardProducts'] != null) {
+      _addDashboardProducts(
+        arguments['dashboardProducts'] as List<Map<String, dynamic>>,
+      );
+    }
+  }
+
+  void _addDashboardProducts(List<Map<String, dynamic>> dashboardProducts) {
+    for (var product in dashboardProducts) {
+      final productId = product['id'];
+      final quantity = (product['quantity'] ?? 0) as int;
+
+      if (quantity > 0) {
+        // Verificar si el producto ya existe en el carrito
+        bool productExists = cartItems.any((item) => item['id'] == productId);
+
+        if (productExists) {
+          // Si existe, actualizar la cantidad y recalcular el precio total
+          int newQuantity = (_cartQuantities[productId] ?? 0) + quantity;
+          _cartQuantities[productId] = newQuantity;
+
+          // Recalcular el precio total del producto existente
+          var existingItem = cartItems.firstWhere(
+            (item) => item['id'] == productId,
+          );
+          double unitPrice = _extractPrice(existingItem['pricePerUnit']);
+          existingItem['totalPrice'] =
+              'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+        } else {
+          // Si no existe, agregar el producto al carrito
+          cartItems.add({
+            'name': product['name'],
+            'pricePerUnit': product['pricePerUnit'],
+            'totalPrice': product['totalPrice'],
+            'image': product['image'],
+            'id': productId,
+          });
+          _cartQuantities[productId] = quantity;
+        }
+      }
+    }
+    setState(() {});
+  }
+
+  void _transferSuggestionToCart(
+    Map<String, dynamic> product,
+    String productId,
+    int quantity,
+  ) {
+    // Calcular el precio unitario y total
+    double unitPrice = _extractPrice(product['price']);
+
+    // Verificar si el producto ya existe en el carrito
+    bool productExists = cartItems.any((item) => item['id'] == productId);
+
+    if (productExists) {
+      // Si existe, actualizar la cantidad
+      int newQuantity = (_cartQuantities[productId] ?? 0) + quantity;
+      _cartQuantities[productId] = newQuantity;
+
+      // Actualizar el totalPrice del producto existente
+      var existingItem = cartItems.firstWhere(
+        (item) => item['id'] == productId,
+      );
+      existingItem['totalPrice'] =
+          'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+    } else {
+      // Si no existe, agregar el producto al carrito
+      cartItems.add({
+        'name': product['name'],
+        'pricePerUnit': product['price'],
+        'totalPrice': 'Bs. ${(unitPrice * quantity).toStringAsFixed(2)}',
+        'image': product['image'],
+        'id': productId,
+      });
+      _cartQuantities[productId] = quantity;
+    }
+
+    setState(() {});
+  }
+
+  void _updateCartItemQuantity(String productId, int newQuantity) {
+    // Encontrar el producto en el carrito y actualizar su cantidad y precio total
+    var cartItem = cartItems.firstWhere((item) => item['id'] == productId);
+    _cartQuantities[productId] = newQuantity;
+
+    // Recalcular el precio total
+    double unitPrice = _extractPrice(cartItem['pricePerUnit']);
+    cartItem['totalPrice'] =
+        'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+  }
+
+  void _removeFromCart(String productId) {
+    _cartQuantities.remove(productId);
+    cartItems.removeWhere((item) => item['id'] == productId);
+    _suggestionQuantities.remove(productId); // También limpiar de sugerencias
   }
 
   @override
@@ -91,13 +196,40 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           // Lista de productos en el carrito
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                return _buildCartItem(cartItems[index]);
-              },
-            ),
+            child: cartItems.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Tu carrito está vacío',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Agrega productos para comenzar',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      return _buildCartItem(cartItems[index]);
+                    },
+                  ),
           ),
           // Sección inferior fija
           Container(
@@ -117,7 +249,9 @@ class _CartScreenState extends State<CartScreen> {
                           onPressed: () {
                             setState(() {
                               _cartQuantities.clear();
-                              _cartItemCount = 0;
+                              cartItems.clear();
+                              _suggestionQuantities
+                                  .clear(); // Limpiar también las sugerencias
                             });
                           },
                           icon: const Icon(Icons.delete, size: 18),
@@ -209,21 +343,25 @@ class _CartScreenState extends State<CartScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Lógica para realizar compra
-                        _showPurchaseDialog();
-                      },
+                      onPressed: cartItems.isEmpty
+                          ? null
+                          : () {
+                              // Lógica para realizar compra
+                              _showPurchaseDialog();
+                            },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: cartItems.isEmpty
+                            ? Colors.grey
+                            : Colors.red,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text(
-                        'Realizar Compra',
-                        style: TextStyle(
+                      child: Text(
+                        cartItems.isEmpty ? 'Carrito Vacío' : 'Realizar Compra',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -270,7 +408,7 @@ class _CartScreenState extends State<CartScreen> {
                 () {
                   // Ya estamos en el carrito
                 },
-                badge: _cartItemCount,
+                badge: _cartItemCount > 0 ? _cartItemCount : null,
               ),
             ],
           ),
@@ -369,12 +507,25 @@ class _CartScreenState extends State<CartScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (quantity > 0) {
-                          _cartQuantities[item['id']] = quantity - 1;
-                          if (_cartQuantities[item['id']] == 0) {
-                            _cartQuantities.remove(item['id']);
-                            _cartItemCount--;
-                          }
+                        if (quantity > 1) {
+                          int newQuantity = quantity - 1;
+                          _cartQuantities[item['id']] = newQuantity;
+                          // Recalcular el precio total
+                          double unitPrice = _extractPrice(
+                            item['pricePerUnit'],
+                          );
+                          item['totalPrice'] =
+                              'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+                        } else {
+                          // Si la cantidad es 1, eliminar el producto del carrito
+                          String productId = item['id'];
+                          _cartQuantities.remove(productId);
+                          cartItems.removeWhere(
+                            (cartItem) => cartItem['id'] == productId,
+                          );
+                          _suggestionQuantities.remove(
+                            productId,
+                          ); // También limpiar de sugerencias
                         }
                       });
                     },
@@ -399,7 +550,12 @@ class _CartScreenState extends State<CartScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        _cartQuantities[item['id']] = quantity + 1;
+                        int newQuantity = quantity + 1;
+                        _cartQuantities[item['id']] = newQuantity;
+                        // Recalcular el precio total
+                        double unitPrice = _extractPrice(item['pricePerUnit']);
+                        item['totalPrice'] =
+                            'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
                       });
                     },
                     child: Container(
@@ -418,8 +574,14 @@ class _CartScreenState extends State<CartScreen> {
               GestureDetector(
                 onTap: () {
                   setState(() {
-                    _cartQuantities.remove(item['id']);
-                    _cartItemCount--;
+                    String productId = item['id'];
+                    _cartQuantities.remove(productId);
+                    cartItems.removeWhere(
+                      (cartItem) => cartItem['id'] == productId,
+                    );
+                    _suggestionQuantities.remove(
+                      productId,
+                    ); // También limpiar de sugerencias
                   });
                 },
                 child: Container(
@@ -439,6 +601,11 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildSuggestionCard(Map<String, dynamic> product) {
+    final productId = '${product['name']}_${product['price']}';
+    final isFavorite = _favoriteSuggestions.contains(productId);
+    final quantity = _suggestionQuantities[productId] ?? 0;
+    final showQuantityControls = quantity > 0;
+
     return Container(
       width: 145,
       margin: const EdgeInsets.only(right: 10),
@@ -502,45 +669,130 @@ class _CartScreenState extends State<CartScreen> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 10),
+          // Sección inferior: cantidad o carrito + corazón
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: () {
-                  // Agregar a carrito
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${product['name']} agregado al carrito'),
-                      duration: const Duration(seconds: 1),
+              if (showQuantityControls)
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (quantity > 0) {
+                            int newQuantity = quantity - 1;
+                            if (newQuantity > 0) {
+                              _suggestionQuantities[productId] = newQuantity;
+                              // Actualizar en el carrito principal
+                              _updateCartItemQuantity(productId, newQuantity);
+                            } else {
+                              _suggestionQuantities.remove(productId);
+                              // Eliminar del carrito principal
+                              _removeFromCart(productId);
+                            }
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(
+                          Icons.remove_circle_outline,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  child: const Icon(
-                    Icons.add_circle_outline,
-                    size: 20,
-                    color: Colors.red,
+                    const SizedBox(width: 8),
+                    Text(
+                      '$quantity',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          int newQuantity = quantity + 1;
+                          _suggestionQuantities[productId] = newQuantity;
+                          // Actualizar en el carrito principal
+                          _updateCartItemQuantity(productId, newQuantity);
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(
+                          Icons.add_circle_outline,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _suggestionQuantities[productId] = 1;
+                    });
+                    // Transferir inmediatamente al carrito principal
+                    _transferSuggestionToCart(product, productId, 1);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product['name']} agregado al carrito'),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.add_shopping_cart,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
+              // Corazón siempre a la derecha
               GestureDetector(
                 onTap: () {
-                  // Agregar a favoritos
+                  setState(() {
+                    if (isFavorite) {
+                      _favoriteSuggestions.remove(productId);
+                    } else {
+                      _favoriteSuggestions.add(productId);
+                    }
+                  });
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${product['name']} agregado a favoritos'),
+                      content: Text(
+                        isFavorite
+                            ? '${product['name']} eliminado de favoritos'
+                            : '${product['name']} agregado a favoritos',
+                      ),
                       duration: const Duration(seconds: 1),
                     ),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  child: const Icon(
-                    Icons.favorite_border,
-                    size: 20,
-                    color: Colors.red,
-                  ),
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  size: 22,
+                  color: isFavorite ? Colors.red : Colors.grey[600],
                 ),
               ),
             ],
@@ -588,7 +840,9 @@ class _CartScreenState extends State<CartScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.green,
+                    color: Color(
+                      0xFFFF9800,
+                    ), // Color naranja/amarillo como en la imagen
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -630,7 +884,11 @@ class _CartScreenState extends State<CartScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/delivery-date');
+                Navigator.pushNamed(
+                  context,
+                  '/delivery-date',
+                  arguments: {'totalAmount': totalAmount},
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

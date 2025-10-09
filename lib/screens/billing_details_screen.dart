@@ -15,8 +15,16 @@ class _BillingDetailsScreenState extends State<BillingDetailsScreen> {
   final TextEditingController _instructionsController = TextEditingController();
   bool _showPaymentMethods = false;
 
-  // Total a pagar (simulado - en una app real vendría del carrito)
-  final double _totalAmount = 128.00;
+  double? _totalAmount;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener el total pasado desde la pantalla anterior
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _totalAmount = arguments?['totalAmount'] ?? 128.00;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +300,7 @@ class _BillingDetailsScreenState extends State<BillingDetailsScreen> {
                         ),
                       ),
                       Text(
-                        'Bs ${_totalAmount.toStringAsFixed(2)}',
+                        'Bs ${(_totalAmount ?? 0.0).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
