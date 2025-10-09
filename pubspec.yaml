@@ -63,6 +63,12 @@ flutter:
     - assets/images/categoria/
     - assets/images/carnes/
     - assets/images/lacteos/
+    - assets/images/verduras/
+    - assets/images/ofertas/
+    - assets/images/recomendacion/
+    - assets/images/recomendados/
+    - assets/images/favoritos/
+    - assets/images/descuentos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
