@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fast_pedido/screens/Recommended_screen.dart';
 import 'offers_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -152,6 +153,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
       'name': 'Nutella',
       'price': 'Bs. 176.00',
       'image': 'assets/images/recomendacion/nutella.png',
+    },
+
+    {
+      'name': 'Gaseosa Coca Cola Clasica Pack 6 un 300 ml',
+      'price': 'Bs. 19.00',
+      'image': 'assets/images/recomendacion/coca_pack.png',
+    },
+    {
+      'name': 'Gaseosa Coca Cola Original Two Pack 3 L',
+      'price': 'Bs. 38.00',
+      'image': 'assets/images/recomendacion/coca_3lt.png',
+    },
+    {
+      'name': 'Whisky Johnnie Walker Black Label 1 L',
+      'price': 'Bs. 670.00',
+      'image': 'assets/images/recomendacion/wisky.png',
+    },
+
+    {
+      'name': 'Whisky Johnnie Walker Swing 750 ml',
+      'price': 'Bs. 885.00',
+      'image': 'assets/images/recomendacion/wiskyW.png',
+    },
+    {
+      'name': 'Hamburguesa Hipermaxi Carne 6 un',
+      'price': 'Bs. 31.90',
+      'image': 'assets/images/recomendacion/hamburguesa.png',
+    },
+    {
+      'name': 'Helado Delizia Chocolate 1 L',
+      'price': 'Bs. 26.50',
+      'image': 'assets/images/recomendacion/helado.png',
     },
   ];
 
@@ -362,9 +395,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildSectionHeader('Ofertas', () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const OffersScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const OffersScreen()),
                 );
               }),
               const SizedBox(height: 12),
@@ -383,8 +414,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
 
               // Sección de Recomendados
-              _buildSectionHeader('Recomendados', () {}),
+              _buildSectionHeader('Recomendados', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecommendedScreen(
+                      title: 'Recomendados',
+                      products: recommended, // le pasas la lista completa
+                    ),
+                  ),
+                );
+              }),
               const SizedBox(height: 12),
+              // 🔽 Solo mostramos una vista previa de 6 productos
+              Builder(
+                builder: (context) {
+                  final recommendedPreview = recommended.take(6).toList();
+                  return SizedBox(
+                    height: 180,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: recommendedPreview.length,
+                      itemBuilder: (context, index) {
+                        return _buildProductCard(recommendedPreview[index]);
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),
+
               SizedBox(
                 height: 180,
                 child: ListView.builder(
