@@ -8,7 +8,7 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  int _cartItemCount = 2;
+  int _cartItemCount = 0;
   int _expandedOrderIndex = -1;
 
   final List<Map<String, dynamic>> orders = [
@@ -150,7 +150,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 () {
                   Navigator.pushReplacementNamed(context, '/cart');
                 },
-                badge: _cartItemCount,
+                badge: _cartItemCount > 0 ? _cartItemCount : null,
               ),
             ],
           ),
@@ -285,7 +285,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Lógica para volver a pedir
+                            _reorderProducts(order);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -462,7 +462,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.green,
+                    color: Color(
+                      0xFFFF9800,
+                    ), // Color naranja/amarillo como en la imagen
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -485,5 +487,66 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       ),
     );
+  }
+
+  void _reorderProducts(Map<String, dynamic> order) {
+    // Convertir los productos de la orden al formato del carrito
+    List<Map<String, dynamic>> orderProducts = [];
+
+    for (var product in order['products']) {
+      // Crear un ID único para el producto
+      final productId = '${product['name']}_${product['price']}';
+
+      // Mapear nombres de productos a imágenes específicas
+      String productImage = _getProductImage(product['name']);
+
+      orderProducts.add({
+        'name': product['name'],
+        'pricePerUnit': product['price'],
+        'totalPrice': product['price'], // Se calculará en el carrito
+        'image': productImage,
+        'id': productId,
+        'quantity': product['quantity'],
+      });
+    }
+
+    // Navegar al carrito con los productos
+    Navigator.pushNamed(
+      context,
+      '/cart',
+      arguments: {'dashboardProducts': orderProducts},
+    );
+
+    // Mostrar confirmación
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${order['products'].length} productos agregados al carrito',
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  String _getProductImage(String productName) {
+    // Mapear nombres de productos a sus imágenes correspondientes
+    final String lowerName = productName.toLowerCase();
+
+    if (lowerName.contains('coca cola') || lowerName.contains('cocacola')) {
+      return 'assets/images/coca_cola.png';
+    } else if (lowerName.contains('papel higiénico') ||
+        lowerName.contains('papel')) {
+      return 'assets/images/papel_higienico.png';
+    } else if (lowerName.contains('leche')) {
+      return 'assets/images/lacteos/leche_delactosada_pil.png';
+    } else if (lowerName.contains('arroz')) {
+      return 'assets/images/arroz.png';
+    } else if (lowerName.contains('aceite')) {
+      return 'assets/images/aceite.png';
+    } else {
+      // Imagen por defecto para productos no reconocidos
+      return 'assets/images/default_product.png';
+    }
   }
 }

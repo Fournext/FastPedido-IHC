@@ -8,8 +8,20 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  int _cartItemCount = 2;
   Map<String, int> _productQuantities = {};
+  Set<String> _favoriteProducts = {};
+  List<Map<String, dynamic>> _dashboardFavoriteProducts = [];
+
+  // Calculamos dinámicamente el número de items en el carrito (solo productos que siguen siendo favoritos)
+  int get _cartItemCount {
+    int total = 0;
+    _productQuantities.forEach((productId, quantity) {
+      if (_favoriteProducts.contains(productId)) {
+        total += quantity;
+      }
+    });
+    return total;
+  }
 
   final List<Map<String, dynamic>> favoriteProducts = [
     {
@@ -53,6 +65,79 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       'image': 'assets/images/favoritos/leche.png',
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar todos los productos como favoritos
+    for (var product in favoriteProducts) {
+      final productId = '${product['name']}_${product['price']}';
+      _favoriteProducts.add(productId);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Procesar favoritos enviados desde el dashboard
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (arguments != null) {
+      if (arguments['dashboardFavorites'] != null) {
+        _addDashboardFavorites(arguments['dashboardFavorites'] as List<String>);
+      }
+      if (arguments['dashboardFavoriteProducts'] != null) {
+        _addDashboardFavoriteProducts(
+          arguments['dashboardFavoriteProducts'] as List<Map<String, dynamic>>,
+        );
+      }
+    }
+  }
+
+  void _addDashboardFavorites(List<String> dashboardFavorites) {
+    setState(() {
+      // Agregar los favoritos del dashboard al conjunto de favoritos
+      for (String favoriteId in dashboardFavorites) {
+        _favoriteProducts.add(favoriteId);
+
+        // Si el producto del dashboard no está en la lista predefinida, agregarlo dinámicamente
+        bool productExists = favoriteProducts.any((product) {
+          final productId = '${product['name']}_${product['price']}';
+          return productId == favoriteId;
+        });
+
+        if (!productExists) {
+          // Este sería un producto del dashboard que se agregó a favoritos
+          // Por ahora solo lo agregamos al Set, la UI lo manejará automáticamente
+          // ya que filtra por _favoriteProducts.contains(productId)
+        }
+      }
+    });
+  }
+
+  void _addDashboardFavoriteProducts(
+    List<Map<String, dynamic>> dashboardFavorites,
+  ) {
+    setState(() {
+      // Agregar productos favoritos del dashboard a la lista local
+      for (var product in dashboardFavorites) {
+        final productId = product['id'];
+        _favoriteProducts.add(productId);
+
+        // Verificar si el producto ya está en la lista predefinida
+        bool productExists = favoriteProducts.any((existingProduct) {
+          final existingProductId =
+              '${existingProduct['name']}_${existingProduct['price']}';
+          return existingProductId == productId;
+        });
+
+        if (!productExists) {
+          // Agregar a la lista de productos favoritos del dashboard
+          _dashboardFavoriteProducts.add(product);
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,16 +194,73 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: favoriteProducts.length,
-                itemBuilder: (context, index) {
-                  return _buildFavoriteCard(favoriteProducts[index]);
+              child: Builder(
+                builder: (context) {
+                  // Combinar productos favoritos predefinidos y del dashboard
+                  List<Map<String, dynamic>> allFavoriteProducts = [];
+
+                  // Agregar productos favoritos predefinidos que siguen siendo favoritos
+                  for (var product in favoriteProducts) {
+                    final productId = '${product['name']}_${product['price']}';
+                    if (_favoriteProducts.contains(productId)) {
+                      allFavoriteProducts.add(product);
+                    }
+                  }
+
+                  // Agregar productos favoritos del dashboard que siguen siendo favoritos
+                  for (var product in _dashboardFavoriteProducts) {
+                    final productId = product['id'];
+                    if (_favoriteProducts.contains(productId)) {
+                      allFavoriteProducts.add({
+                        'name': product['name'],
+                        'price': product['price'],
+                        'image': product['image'],
+                      });
+                    }
+                  }
+
+                  if (allFavoriteProducts.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.favorite_border,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No tienes productos favoritos',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Agrega productos a favoritos desde el dashboard',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.75,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                    itemCount: allFavoriteProducts.length,
+                    itemBuilder: (context, index) {
+                      return _buildFavoriteCard(allFavoriteProducts[index]);
+                    },
+                  );
                 },
               ),
             ),
@@ -152,9 +294,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 'Carrito',
                 false,
                 () {
-                  Navigator.pushReplacementNamed(context, '/cart');
+                  _navigateToCart();
                 },
-                badge: _cartItemCount,
+                badge: _cartItemCount > 0 ? _cartItemCount : null,
               ),
             ],
           ),
@@ -167,6 +309,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final productId = '${product['name']}_${product['price']}';
     final quantity = _productQuantities[productId] ?? 0;
     final showQuantityControls = quantity > 0;
+    final isFavorite = _favoriteProducts.contains(productId);
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -241,6 +384,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         setState(() {
                           if (quantity > 0) {
                             _productQuantities[productId] = quantity - 1;
+                            if (_productQuantities[productId] == 0) {
+                              _productQuantities.remove(productId);
+                            }
                           }
                         });
                       },
@@ -285,6 +431,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     setState(() {
                       _productQuantities[productId] = 1;
                     });
+                    // Mostrar confirmación
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product['name']} agregado al carrito'),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(7),
@@ -307,7 +461,35 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                   ),
                 ),
-              const Icon(Icons.favorite, size: 22, color: Colors.red),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (isFavorite) {
+                      _favoriteProducts.remove(productId);
+                      // También eliminar la cantidad si existe
+                      _productQuantities.remove(productId);
+                    } else {
+                      _favoriteProducts.add(productId);
+                    }
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isFavorite
+                            ? '${product['name']} eliminado de favoritos'
+                            : '${product['name']} agregado a favoritos',
+                      ),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: isFavorite ? Colors.red : Colors.green,
+                    ),
+                  );
+                },
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  size: 22,
+                  color: isFavorite ? Colors.red : Colors.grey[600],
+                ),
+              ),
             ],
           ),
         ],
@@ -353,7 +535,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.green,
+                    color: Color(
+                      0xFFFF9800,
+                    ), // Color naranja/amarillo como en la imagen
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -376,5 +560,58 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
       ),
     );
+  }
+
+  void _navigateToCart() {
+    // Preparar los productos de favoritos para enviar al carrito
+    List<Map<String, dynamic>> favoriteProductsToCart = [];
+
+    // Revisar productos favoritos predefinidos con cantidades (solo los que siguen siendo favoritos)
+    for (var product in favoriteProducts) {
+      final productId = '${product['name']}_${product['price']}';
+      final quantity = _productQuantities[productId] ?? 0;
+      final isFavorite = _favoriteProducts.contains(productId);
+
+      if (quantity > 0 && isFavorite) {
+        favoriteProductsToCart.add({
+          'name': product['name'],
+          'pricePerUnit': product['price'],
+          'totalPrice': product['price'], // Se calculará en el carrito
+          'image': product['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Revisar productos favoritos del dashboard con cantidades
+    for (var product in _dashboardFavoriteProducts) {
+      final productId = product['id'];
+      final quantity = _productQuantities[productId] ?? 0;
+      final isFavorite = _favoriteProducts.contains(productId);
+
+      if (quantity > 0 && isFavorite) {
+        favoriteProductsToCart.add({
+          'name': product['name'],
+          'pricePerUnit': product['price'],
+          'totalPrice': product['price'], // Se calculará en el carrito
+          'image': product['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Navegar al carrito con los productos
+    Navigator.pushNamed(
+      context,
+      '/cart',
+      arguments: {'dashboardProducts': favoriteProductsToCart},
+    );
+
+    // Limpiar las cantidades de favoritos después de enviar al carrito
+    setState(() {
+      _productQuantities.clear();
+    });
   }
 }
