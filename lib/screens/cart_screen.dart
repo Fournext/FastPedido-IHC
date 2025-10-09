@@ -108,7 +108,7 @@ class _CartScreenState extends State<CartScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 5,
                   ),
                   child: Row(
                     children: [
@@ -134,19 +134,28 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Lógica de puntos de descuento
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            foregroundColor: Colors.black87,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                spreadRadius: 0,
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Puntos de Descuentos\nGanados',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
                             ),
                           ),
-                          child: const Text('Puntos de Descuentos\nGanados'),
                         ),
                       ),
                     ],
@@ -155,10 +164,7 @@ class _CartScreenState extends State<CartScreen> {
                 // Total
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   color: Colors.grey[200],
                   child: Text(
                     'Total: Bs ${totalAmount.toStringAsFixed(2)}',
@@ -187,7 +193,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 // Lista horizontal de sugerencias
                 SizedBox(
-                  height: 140,
+                  height: 180,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -251,19 +257,11 @@ class _CartScreenState extends State<CartScreen> {
                 'Favoritos',
                 false,
                 () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/favorites',
-                    (route) => false,
-                  );
+                  Navigator.pushReplacementNamed(context, '/favorites');
                 },
               ),
               _buildBottomNavItem(Icons.motorcycle, 'Delivery', false, () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/orders',
-                  (route) => false,
-                );
+                Navigator.pushReplacementNamed(context, '/orders');
               }),
               _buildBottomNavItem(
                 Icons.shopping_cart_outlined,
@@ -288,14 +286,20 @@ class _CartScreenState extends State<CartScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -436,68 +440,109 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildSuggestionCard(Map<String, dynamic> product) {
     return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(8),
+      width: 145,
+      margin: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
-            blurRadius: 6,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
+            blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Image.asset(
-              product['image'],
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.shopping_bag,
-                  size: 30,
-                  color: Colors.grey[400],
-                );
-              },
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  product['image'],
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.shopping_bag,
+                      size: 50,
+                      color: Colors.grey[400],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             product['price'],
             style: const TextStyle(
-              fontSize: 10,
               fontWeight: FontWeight.bold,
+              fontSize: 14,
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 2),
           Text(
             product['name'],
-            style: TextStyle(fontSize: 8, color: Colors.grey[800]),
-            maxLines: 2,
+            style: TextStyle(
+              fontSize: 10.5,
+              height: 1.3,
+              color: Colors.grey[800],
+            ),
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
                 onTap: () {
                   // Agregar a carrito
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${product['name']} agregado al carrito'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
                 },
-                child: const Icon(
-                  Icons.add_circle_outline,
-                  size: 16,
-                  color: Colors.red,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(
+                    Icons.add_circle_outline,
+                    size: 20,
+                    color: Colors.red,
+                  ),
                 ),
               ),
-              const Icon(Icons.favorite_border, size: 16, color: Colors.grey),
+              GestureDetector(
+                onTap: () {
+                  // Agregar a favoritos
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${product['name']} agregado a favoritos'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    size: 20,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -519,6 +564,14 @@ class _CartScreenState extends State<CartScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.red : Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,
@@ -577,41 +630,13 @@ class _CartScreenState extends State<CartScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _showSuccessDialog();
+                Navigator.pushNamed(context, '/delivery-date');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('¡Compra Exitosa!'),
-          content: const Text('Tu pedido ha sido procesado correctamente.'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  _cartQuantities.clear();
-                  _cartItemCount = 0;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('OK'),
             ),
           ],
         );

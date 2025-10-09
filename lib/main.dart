@@ -3,6 +3,10 @@ import 'screens/dashboard_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/cart_screen.dart';
+import 'screens/delivery_date_screen.dart';
+import 'screens/billing_details_screen.dart';
+import 'screens/credit_card_screen.dart';
+import 'screens/qr_payment_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,6 +30,10 @@ class MyApp extends StatelessWidget {
         '/favorites': (context) => const FavoritesScreen(),
         '/orders': (context) => const OrdersScreen(),
         '/cart': (context) => const CartScreen(),
+        '/delivery-date': (context) => const DeliveryDateScreen(),
+        '/billing-details': (context) => const BillingDetailsScreen(),
+        '/credit-card': (context) => const CreditCardScreen(),
+        '/qr-payment': (context) => const QRPaymentScreen(),
       },
     );
   }

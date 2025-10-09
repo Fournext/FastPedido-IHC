@@ -137,11 +137,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 'Favoritos',
                 false,
                 () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/favorites',
-                    (route) => false,
-                  );
+                  Navigator.pushReplacementNamed(context, '/favorites');
                 },
               ),
               _buildBottomNavItem(Icons.motorcycle, 'Delivery', true, () {
@@ -152,7 +148,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 'Carrito',
                 false,
                 () {
-                  Navigator.pushNamed(context, '/cart');
+                  Navigator.pushReplacementNamed(context, '/cart');
                 },
                 badge: _cartItemCount,
               ),
@@ -169,14 +165,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -436,6 +438,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.red : Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,

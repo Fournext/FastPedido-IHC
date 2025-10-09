@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'offers_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -14,9 +15,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, int> _productQuantities = {};
 
   final List<Map<String, dynamic>> categories = [
-    {'name': 'Verduras', 'image': 'assets/images/vegetables.png'},
-    {'name': 'Carnes', 'image': 'assets/images/carnes.png'},
-    {'name': 'Lácteos', 'image': 'assets/images/lacteos.png'},
+    {'name': 'Verduras', 'image': 'assets/images/categoria/verduras.png'},
+    {'name': 'Carnes', 'image': 'assets/images/categoria/carnes.png'},
+    {'name': 'Lácteos', 'image': 'assets/images/categoria/lacteos.png'},
   ];
 
   final Map<String, List<Map<String, dynamic>>> productsByCategory = {
@@ -24,56 +25,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {
         'name': 'Lechuga',
         'price': 'Bs. 8.50',
-        'image': 'assets/images/lechuga.jpg',
+        'image': 'assets/images/verduras/lechuga.jpg',
       },
       {
         'name': 'Tomate',
         'price': 'Bs. 6.00',
-        'image': 'assets/images/tomate.png',
+        'image': 'assets/images/verduras/tomate.png',
       },
       {
         'name': 'Zanahoria',
         'price': 'Bs. 5.50',
-        'image': 'assets/images/zanahoria.png',
+        'image': 'assets/images/verduras/zanahoria.png',
       },
       {
         'name': 'Cebolla',
         'price': 'Bs. 4.00',
-        'image': 'assets/images/cebolla.png',
+        'image': 'assets/images/verduras/cebolla.png',
       },
     ],
     'Carnes': [
       {
-        'name': 'Carne molida',
-        'price': 'Bs. 53.10',
-        'image': 'assets/images/carne_molida.png',
+        'name': 'Carne Molida de Primera',
+        'price': 'Bs. 82.00',
+        'image': 'assets/images/carnes/carnemolida.png',
       },
       {
-        'name': 'Pollo',
-        'price': 'Bs. 45.00',
-        'image': 'assets/images/pollo.png',
+        'name': 'Filete de Pechuga Sofia 1 kg Bandeja',
+        'price': 'Bs. 56.90',
+        'image': 'assets/images/carnes/filete_pollo_1kg.png',
       },
       {
-        'name': 'Cerdo',
-        'price': 'Bs. 38.00',
-        'image': 'assets/images/cerdo.png',
+        'name': 'Picaña Frigor al Vacio kg',
+        'price': 'Bs. 166.00',
+        'image': 'assets/images/carnes/picaña_frigor.png',
+      },
+      {
+        'name': 'Pollo Frial Entero Sofia kg',
+        'price': 'Bs. 24.90',
+        'image': 'assets/images/carnes/pollo_frial.png',
+      },
+      {
+        'name': 'Silpancho kg',
+        'price': 'Bs. 66.00',
+        'image': 'assets/images/carnes/silpancho_procesado.png',
+      },
+      {
+        'name': 'Milanesa de Pollo kg',
+        'price': 'Bs. 66.00',
+        'image': 'assets/images/carnes/milanesa.png',
       },
     ],
     'Lácteos': [
       {
-        'name': 'Leche',
-        'price': 'Bs. 8.50',
-        'image': 'assets/images/leche.png',
+        'name': 'Nueva Leche Pil Deslactosada 800 ml',
+        'price': 'Bs. 9.90',
+        'image': 'assets/images/lacteos/leche_delactosada_pil.png',
       },
       {
-        'name': 'Queso',
+        'name': 'Mantequilla Pil Con Sal 200 gr',
+        'price': 'Bs. 24.50',
+        'image': 'assets/images/lacteos/mamtequilla_pil_conSal_200gr.png',
+      },
+      {
+        'name': 'Dulce de Leche Pil 500 gr',
         'price': 'Bs. 25.00',
-        'image': 'assets/images/queso.png',
+        'image': 'assets/images/lacteos/dulce_leche_pil.png',
       },
       {
-        'name': 'Yogurt',
-        'price': 'Bs. 12.00',
-        'image': 'assets/images/yogurt.png',
+        'name': 'Yogurt Pil Bebible Frutilla 1 L',
+        'price': 'Bs. 16.90',
+        'image': 'assets/images/lacteos/yogurt_bebible_1lt.png',
+      },
+      {
+        'name': 'Yogurt Griego Delizia Sabor Fresa 170 gr',
+        'price': 'Bs. 9.30',
+        'image': 'assets/images/lacteos/yogurt_griego.png',
+      },
+      {
+        'name': 'Queso San German Yapacani un',
+        'price': 'Bs. 75.00',
+        'image': 'assets/images/lacteos/queso_yapacani.png',
       },
     ],
   };
@@ -82,17 +113,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'name': 'Carne molida\nde segunda',
       'price': 'Bs. 53.10',
-      'image': 'assets/images/carnemolidasegunda.png',
+      'originalPrice': 'Bs. 65.00',
+      'discount': '18%',
+      'image': 'assets/images/ofertas/carnemolidasegunda.png',
     },
     {
       'name': 'Cereal Nestle\nChocapic\n250gr',
       'price': 'Bs. 46.80',
-      'image': 'assets/images/chocapic.png',
+      'originalPrice': 'Bs. 58.50',
+      'discount': '20%',
+      'image': 'assets/images/ofertas/chocapic.png',
     },
     {
       'name': 'Gaseosa\nCoca Cola de\n3lt',
       'price': 'Bs. 18.00',
-      'image': 'assets/images/cocacola3l.png',
+      'originalPrice': 'Bs. 22.50',
+      'discount': '20%',
+      'image': 'assets/images/ofertas/cocacola3l.png',
     },
   ];
 
@@ -100,17 +137,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'name': 'Cerveza\nPaceña Lata\n269 ml CBX',
       'price': 'Bs. 7.40',
-      'image': 'assets/images/cerveza.png',
+      'image': 'assets/images/recomendacion/cerveza.png',
     },
     {
       'name': 'Cereales\nLucky Charms',
-      'price': 'Bs. 177.00',
-      'image': 'assets/images/cereales.png',
+      'price': 'Bs. 69.00',
+      'image': 'assets/images/recomendacion/cereales.png',
     },
     {
       'name': 'Nutella',
       'price': 'Bs. 176.00',
-      'image': 'assets/images/nutella.png',
+      'image': 'assets/images/recomendacion/nutella.png',
     },
   ];
 
@@ -282,38 +319,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ],
                             ),
-                            child: Container(
-                              margin: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                              child: ClipOval(
-                                child: Container(
-                                  width: 85,
-                                  height: 85,
-                                  color: Colors.white,
-                                  child: Image.asset(
-                                    category['image'],
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print('Error loading image: ${category['image']}');
-                                      print('Error details: $error');
-                                      return Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey[100],
-                                        ),
-                                        child: Icon(
-                                          Icons.category,
-                                          size: 35,
-                                          color: Colors.grey[400],
-                                        ),
-                                      );
-                                    },
-                                  ),
+                            child: ClipOval(
+                              child: Padding(
+                                padding: const EdgeInsets.all(4), // antes 12
+                                child: Image.asset(
+                                  category['image'],
+                                  fit: BoxFit.cover, // cambia a cover
                                 ),
                               ),
                             ),
@@ -344,7 +355,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildCategoryProducts()
             else ...[
               // Sección de Ofertas
-              _buildSectionHeader('Ofertas', () {}),
+              _buildSectionHeader('Ofertas', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OffersScreen(),
+                  ),
+                );
+              }),
               const SizedBox(height: 12),
               SizedBox(
                 height: 180,
@@ -493,14 +511,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       margin: EdgeInsets.only(right: fullWidth ? 0 : 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -508,39 +532,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.white,
-                    ),
-                    child: Image.asset(
-                      product['image'],
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        print('🚨 ERROR: No se pudo cargar: ${product['image']}');
-                        print('🔍 Producto: ${product['name']}');
-                        print('⚠️ Error: $error');
-                        return Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey[100],
-                          ),
-                          child: Icon(
-                            Icons.shopping_bag,
-                            size: 50,
-                            color: Colors.grey[400],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                product['image'],
+                fit: BoxFit.cover, // llena todo el espacio
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.shopping_bag,
+                    size: 60,
+                    color: Colors.grey[400],
+                  );
+                },
               ),
             ),
           ),
@@ -679,6 +684,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         decoration: BoxDecoration(
           color: Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,

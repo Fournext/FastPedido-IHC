@@ -13,64 +13,44 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   final List<Map<String, dynamic>> favoriteProducts = [
     {
-      'name': 'Gaseosa Pepsi\n355 Ml',
-      'price': 'Bs. 4.00',
-      'image': 'assets/images/pepsi.png',
+      'name': 'Gaseosa Pepsi\n500 Ml',
+      'price': 'Bs. 8.00',
+      'image': 'assets/images/favoritos/pepsi.png',
     },
     {
       'name': 'Papas Pringles\nOriginal 124 gr',
       'price': 'Bs. 49.00',
-      'image': 'assets/images/pringles.png',
-    },
-    {
-      'name': 'Queso Leche\nCheesecake\nDelizia 170 g',
-      'price': 'Bs. 9.30',
-      'image': 'assets/images/queso.png',
+      'image': 'assets/images/favoritos/pringles.png',
     },
     {
       'name': 'Takis Fuego\nMax 240 gr',
       'price': 'Bs. 43.00',
-      'image': 'assets/images/takis.png',
+      'image': 'assets/images/favoritos/takis.png',
     },
     {
       'name': 'Popcorn ACT II\nMantequilla\n99 gr',
-      'price': 'Precio',
-      'image': 'assets/images/popcorn.png',
+      'price': 'Bs. 20.50',
+      'image': 'assets/images/favoritos/popcorn.png',
     },
     {
       'name': 'Whisky Black\nLabel 750 ml',
       'price': 'Bs. 525.00',
-      'image': 'assets/images/whisky.png',
+      'image': 'assets/images/favoritos/whisky.png',
     },
     {
       'name': 'Singani Casa\nReal Etiqueta\nNegra 1 L',
       'price': 'Bs. 98.00',
-      'image': 'assets/images/singani.png',
+      'image': 'assets/images/favoritos/singani.png',
     },
     {
       'name': 'Paneton\nHuereñito\nChocolate 600 g',
       'price': 'Bs. 39.90',
-      'image': 'assets/images/paneton.png',
+      'image': 'assets/images/favoritos/paneton.png',
     },
     {
       'name': 'Leche\nChocolatosa\nPil 800 ml',
       'price': 'Bs. 16.80',
-      'image': 'assets/images/leche_chocolatosa.png',
-    },
-    {
-      'name': 'Hamburguesa\nIcerito 8',
-      'price': 'Bs. 32.80',
-      'image': 'assets/images/hamburguesa.png',
-    },
-    {
-      'name': 'Mantequilla Pil\nCon Sal 200 gr',
-      'price': 'Bs. 24.50',
-      'image': 'assets/images/mantequilla.png',
-    },
-    {
-      'name': 'Vino Aranjuez\nRosé Tinto',
-      'price': 'Precio',
-      'image': 'assets/images/vino.png',
+      'image': 'assets/images/favoritos/leche.png',
     },
   ];
 
@@ -162,17 +142,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildBottomNavItem(Icons.favorite, 'Favoritos', true, () {
-                Navigator.pop(context);
+                // Ya estamos en favoritos, no hacer nada
               }),
               _buildBottomNavItem(Icons.motorcycle, 'Delivery', false, () {
-                Navigator.pushNamed(context, '/orders');
+                Navigator.pushReplacementNamed(context, '/orders');
               }),
               _buildBottomNavItem(
                 Icons.shopping_cart_outlined,
                 'Carrito',
                 false,
                 () {
-                  Navigator.pushNamed(context, '/cart');
+                  Navigator.pushReplacementNamed(context, '/cart');
                 },
                 badge: _cartItemCount,
               ),
@@ -191,14 +171,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -343,6 +329,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.red : Colors.grey[200],
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           clipBehavior: Clip.none,
