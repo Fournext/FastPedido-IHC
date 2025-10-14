@@ -13,10 +13,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _selectedCategory;
   Set<String> _favoriteProducts = {};
   Map<String, int> _productQuantities = {};
+  int _userPoints = 0; // Puntos del usuario
 
   // Calculamos dinámicamente el número de items en el carrito
   int get _cartItemCount {
     return _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  }
+
+  // Método para calcular puntos basado en el precio del producto
+  int _calculatePointsForProduct(String price) {
+    final priceMatch = RegExp(r'\d+').firstMatch(price);
+    if (priceMatch != null) {
+      final matchedString = priceMatch.group(0) ?? '0';
+      final points = int.tryParse(matchedString) ?? 1;
+      return points; // Solo la parte entera
+    }
+    return 1; // Punto mínimo si no se puede calcular
+  }
+
+  // Método para actualizar puntos cuando se agrega/quita un producto
+  void _updatePoints(String productPrice, bool isAdding) {
+    final points = _calculatePointsForProduct(productPrice);
+    setState(() {
+      if (isAdding) {
+        _userPoints += points;
+      } else {
+        _userPoints = (_userPoints - points).clamp(0, double.infinity).toInt();
+      }
+    });
+    
   }
 
   final List<Map<String, dynamic>> categories = [
@@ -284,16 +309,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
                     ),
-                    child: Center(
-                      child: Text(
-                        'Puntos de Compra',
-                        style: TextStyle(
-                          fontSize: 11,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.stars,
                           color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
+                          size: 16,
                         ),
-                      ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$_userPoints pts',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -658,6 +693,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _productQuantities[productId] = quantity - 1;
                           }
                         });
+                        // Quitar puntos por decremento
+                        if (quantity > 0) {
+                          _updatePoints(product['price'], false);
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(4),
@@ -682,6 +721,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         setState(() {
                           _productQuantities[productId] = quantity + 1;
                         });
+                        // Agregar puntos por incremento
+                        _updatePoints(product['price'], true);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(4),
@@ -700,6 +741,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     setState(() {
                       _productQuantities[productId] = 1;
                     });
+                    // Agregar puntos por el producto
+                    _updatePoints(product['price'], true);
                     // Mostrar confirmación
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -898,6 +941,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       arguments: {
         'dashboardProducts': dashboardProducts,
         'dashboardFavoriteProducts': dashboardFavoritesToSend,
+        'currentPoints': _userPoints, // Enviar puntos actuales
       },
     );
 

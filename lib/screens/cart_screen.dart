@@ -14,11 +14,43 @@ class _CartScreenState extends State<CartScreen> {
   Set<String> _favoriteSuggestions = {};
   Map<String, int> _suggestionQuantities = {};
 
+  // Puntos totales (dashboard + carrito)
+  int _totalPoints = 0;
+  int _dashboardPoints = 0; // Puntos recibidos del dashboard
+
   List<Map<String, dynamic>> cartItems = [];
 
   // Calculamos dinámicamente el número de items en el carrito
   int get _cartItemCount {
     return _cartQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  }
+
+  // Método para calcular puntos totales (dashboard + productos nuevos del carrito)
+  int _calculateTotalPoints() {
+    int newCartPoints = 0;
+    
+    // Solo calcular puntos de productos agregados desde las sugerencias en el carrito
+    // No recalcular puntos de productos que vinieron del dashboard
+    for (var item in cartItems) {
+      final quantity = _cartQuantities[item['id']] ?? 0;
+      if (quantity > 0) {
+        // Verificar si este producto fue agregado desde las sugerencias
+        // (productos del dashboard ya tienen sus puntos contados en _dashboardPoints)
+        bool isFromSuggestions = suggestions.any((suggestion) => 
+          '${suggestion['name']}_${suggestion['price']}' == item['id']);
+        
+        if (isFromSuggestions) {
+          // Solo calcular puntos para productos agregados desde sugerencias
+          double unitPrice = _extractPrice(item['pricePerUnit']);
+          int pointsPerUnit = unitPrice.floor();
+          newCartPoints += pointsPerUnit * quantity;
+        }
+      }
+    }
+    
+    // Actualizar el total de puntos
+    _totalPoints = _dashboardPoints + newCartPoints;
+    return _totalPoints;
   }
 
   final List<Map<String, dynamic>> suggestions = [
@@ -73,10 +105,18 @@ class _CartScreenState extends State<CartScreen> {
     // Procesar productos enviados desde el dashboard
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (arguments != null && arguments['dashboardProducts'] != null) {
-      _addDashboardProducts(
-        arguments['dashboardProducts'] as List<Map<String, dynamic>>,
-      );
+    if (arguments != null) {
+      // Recibir puntos del dashboard
+      if (arguments['currentPoints'] != null) {
+        _dashboardPoints = arguments['currentPoints'] as int;
+      }
+      
+      // Procesar productos del dashboard
+      if (arguments['dashboardProducts'] != null) {
+        _addDashboardProducts(
+          arguments['dashboardProducts'] as List<Map<String, dynamic>>,
+        );
+      }
     }
   }
 
@@ -115,6 +155,12 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
     setState(() {});
+  }
+
+  // Método para calcular puntos de un producto
+  int _calculatePointsForProduct(String priceString) {
+    double unitPrice = _extractPrice(priceString);
+    return unitPrice.floor(); // Solo la parte entera
   }
 
   void _transferSuggestionToCart(
@@ -273,6 +319,7 @@ class _CartScreenState extends State<CartScreen> {
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey[300]!, width: 1),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.1),
@@ -282,13 +329,37 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             ],
                           ),
-                          child: const Text(
-                            'Puntos de Descuentos\nGanados',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 14,
-                            ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.stars,
+                                    color: Colors.grey[600],
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${_calculateTotalPoints()} pts',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Puntos Ganados',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -747,9 +818,13 @@ class _CartScreenState extends State<CartScreen> {
                     });
                     // Transferir inmediatamente al carrito principal
                     _transferSuggestionToCart(product, productId, 1);
+                    
+                    // Calcular puntos ganados por este producto
+                    int pointsGained = _calculatePointsForProduct(product['price']);
+                    
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${product['name']} agregado al carrito'),
+                        content: Text('${product['name']} agregado al carrito (+$pointsGained pts)'),
                         duration: const Duration(seconds: 1),
                         backgroundColor: Colors.green,
                       ),
