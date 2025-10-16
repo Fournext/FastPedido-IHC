@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fast_pedido/screens/Recommended_screen.dart';
 import 'offers_screen.dart';
+import 'package:fast_pedido/widgets/bottom_menu.dart';
+import 'package:fast_pedido/widgets/product_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -41,7 +43,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _userPoints = (_userPoints - points).clamp(0, double.infinity).toInt();
       }
     });
-    
   }
 
   final List<Map<String, dynamic>> categories = [
@@ -314,11 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.stars,
-                          color: Colors.grey[600],
-                          size: 16,
-                        ),
+                        Icon(Icons.stars, color: Colors.grey[600], size: 16),
                         const SizedBox(width: 4),
                         Text(
                           '$_userPoints pts',
@@ -441,7 +438,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: offers.length,
                   itemBuilder: (context, index) {
-                    return _buildProductCard(offers[index]);
+                    final product = offers[index];
+                    final productId = '${product['name']}_${product['price']}';
+                    final isFavorite = _favoriteProducts.contains(productId);
+                    final quantity = _productQuantities[productId] ?? 0;
+
+                    return ProductCard(
+                      product: product,
+                      fullWidth: false,
+                      quantity: quantity,
+                      isFavorite: isFavorite,
+                      onAdd: () {
+                        setState(() {
+                          _productQuantities[productId] = quantity + 1;
+                        });
+                        _updatePoints(product['price'], true);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${product['name']} agregado al carrito',
+                            ),
+                            duration: const Duration(seconds: 1),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      },
+                      onRemove: () {
+                        setState(() {
+                          if (quantity > 1) {
+                            _productQuantities[productId] = quantity - 1;
+                          } else {
+                            _productQuantities.remove(productId);
+                          }
+                        });
+                        _updatePoints(product['price'], false);
+                      },
+                      onToggleFavorite: () {
+                        setState(() {
+                          if (isFavorite) {
+                            _favoriteProducts.remove(productId);
+                          } else {
+                            _favoriteProducts.add(productId);
+                          }
+                        });
+                      },
+                    );
                   },
                 ),
               ),
@@ -472,7 +513,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: recommendedPreview.length,
                       itemBuilder: (context, index) {
-                        return _buildProductCard(recommendedPreview[index]);
+                        final product = recommendedPreview[index];
+                        final productId =
+                            '${product['name']}_${product['price']}';
+                        final isFavorite = _favoriteProducts.contains(
+                          productId,
+                        );
+                        final quantity = _productQuantities[productId] ?? 0;
+
+                        return ProductCard(
+                          product: product,
+                          fullWidth: false,
+                          quantity: quantity,
+                          isFavorite: isFavorite,
+                          onAdd: () {
+                            setState(() {
+                              _productQuantities[productId] = quantity + 1;
+                            });
+                            _updatePoints(product['price'], true);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${product['name']} agregado al carrito',
+                                ),
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                          onRemove: () {
+                            setState(() {
+                              if (quantity > 1) {
+                                _productQuantities[productId] = quantity - 1;
+                              } else {
+                                _productQuantities.remove(productId);
+                              }
+                            });
+                            _updatePoints(product['price'], false);
+                          },
+                          onToggleFavorite: () {
+                            setState(() {
+                              if (isFavorite) {
+                                _favoriteProducts.remove(productId);
+                              } else {
+                                _favoriteProducts.add(productId);
+                              }
+                            });
+                          },
+                        );
                       },
                     ),
                   );
@@ -486,87 +574,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 10,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildBottomNavItem(Icons.favorite_border, 'Favoritos', () {
-                // Preparar productos favoritos del dashboard con sus datos completos
-                List<Map<String, dynamic>> dashboardFavoritesToSend = [];
-                _collectFavoriteProducts(offers, dashboardFavoritesToSend);
-                _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
+      bottomNavigationBar: BottomMenu(
+        cartBadge: _cartItemCount > 0 ? _cartItemCount : null,
+        onFavorites: () {
+          List<Map<String, dynamic>> dashboardFavoritesToSend = [];
+          _collectFavoriteProducts(offers, dashboardFavoritesToSend);
+          _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
 
-                if (_selectedCategory != null) {
-                  final products = productsByCategory[_selectedCategory] ?? [];
-                  _collectFavoriteProducts(products, dashboardFavoritesToSend);
-                }
+          if (_selectedCategory != null) {
+            final products = productsByCategory[_selectedCategory] ?? [];
+            _collectFavoriteProducts(products, dashboardFavoritesToSend);
+          }
 
-                Navigator.pushNamed(
-                  context,
-                  '/favorites',
-                  arguments: {
-                    'dashboardFavorites': _favoriteProducts.toList(),
-                    'dashboardFavoriteProducts': dashboardFavoritesToSend,
-                  },
-                );
-              }),
-              _buildBottomNavItem(Icons.motorcycle, 'Delivery', () {
-                Navigator.pushNamed(context, '/orders');
-              }),
-              _buildBottomNavItem(
-                Icons.shopping_cart_outlined,
-                'Carrito',
-                () {
-                  _navigateToCart();
-                },
-                badge: _cartItemCount > 0 ? _cartItemCount : null,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryProducts() {
-    final products = productsByCategory[_selectedCategory] ?? [];
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _selectedCategory!,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              return _buildProductCard(products[index], fullWidth: true);
+          Navigator.pushNamed(
+            context,
+            '/favorites',
+            arguments: {
+              'dashboardFavorites': _favoriteProducts.toList(),
+              'dashboardFavoriteProducts': dashboardFavoritesToSend,
             },
-          ),
-        ],
+          );
+        },
+        onDelivery: () => Navigator.pushNamed(context, '/orders'),
+        onCart: () => _navigateToCart(),
+        onProfile: () => Navigator.pushNamed(context, '/profile'),
+        selected: '',
       ),
     );
   }
@@ -607,175 +639,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildProductCard(
-    Map<String, dynamic> product, {
-    bool fullWidth = false,
-  }) {
-    final productId = '${product['name']}_${product['price']}';
-    final isFavorite = _favoriteProducts.contains(productId);
-    final quantity = _productQuantities[productId] ?? 0;
-    final showQuantityControls = quantity > 0;
+  // ProductCard widget handles product presentation; local builder removed.
 
-    return Container(
-      width: fullWidth ? null : 145,
-      margin: EdgeInsets.only(right: fullWidth ? 0 : 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            spreadRadius: 0,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                product['image'],
-                fit: BoxFit.cover, // llena todo el espacio
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.shopping_bag,
-                    size: 60,
-                    color: Colors.grey[400],
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            product['price'],
+  Widget _buildCategoryProducts() {
+    final categoryName = _selectedCategory ?? '';
+    final products = productsByCategory[_selectedCategory] ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(
+            categoryName,
             style: const TextStyle(
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              fontSize: 14,
               color: Colors.black87,
             ),
           ),
-          Text(
-            product['name'],
-            style: TextStyle(
-              fontSize: 10.5,
-              height: 1.3,
-              color: Colors.grey[800],
-            ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          // Sección inferior: cantidad o carrito + corazón
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (showQuantityControls)
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (quantity > 0) {
-                            _productQuantities[productId] = quantity - 1;
-                          }
-                        });
-                        // Quitar puntos por decremento
-                        if (quantity > 0) {
-                          _updatePoints(product['price'], false);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        child: const Icon(
-                          Icons.remove_circle_outline,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$quantity',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _productQuantities[productId] = quantity + 1;
-                        });
-                        // Agregar puntos por incremento
-                        _updatePoints(product['price'], true);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        child: const Icon(
-                          Icons.add_circle_outline,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _productQuantities[productId] = 1;
-                    });
-                    // Agregar puntos por el producto
-                    _updatePoints(product['price'], true);
-                    // Mostrar confirmación
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${product['name']} agregado al carrito'),
-                        duration: const Duration(seconds: 1),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          spreadRadius: 0,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.add_shopping_cart,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              // Corazón siempre a la derecha
-              GestureDetector(
-                onTap: () {
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 220,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              final productId = '${product['name']}_${product['price']}';
+              final isFavorite = _favoriteProducts.contains(productId);
+              final quantity = _productQuantities[productId] ?? 0;
+
+              return ProductCard(
+                product: product,
+                fullWidth: false,
+                quantity: quantity,
+                isFavorite: isFavorite,
+                onAdd: () {
+                  setState(() {
+                    _productQuantities[productId] = quantity + 1;
+                  });
+                  _updatePoints(product['price'], true);
+                },
+                onRemove: () {
+                  setState(() {
+                    if (quantity > 1) {
+                      _productQuantities[productId] = quantity - 1;
+                    } else {
+                      _productQuantities.remove(productId);
+                    }
+                  });
+                  _updatePoints(product['price'], false);
+                },
+                onToggleFavorite: () {
                   setState(() {
                     if (isFavorite) {
                       _favoriteProducts.remove(productId);
@@ -783,89 +701,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _favoriteProducts.add(productId);
                     }
                   });
-                  // Mostrar confirmación
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isFavorite
-                            ? '${product['name']} eliminado de favoritos'
-                            : '${product['name']} agregado a favoritos',
-                      ),
-                      duration: const Duration(seconds: 1),
-                      backgroundColor: isFavorite ? Colors.red : Colors.green,
-                    ),
-                  );
                 },
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  size: 22,
-                  color: isFavorite ? Colors.red : Colors.grey[600],
-                ),
-              ),
-            ],
+              );
+            },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(
-    IconData icon,
-    String label,
-    VoidCallback onTap, {
-    int? badge,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 0,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Icon(icon, color: Colors.grey[600], size: 28),
-            if (badge != null && badge > 0)
-              Positioned(
-                right: -8,
-                top: -8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Color(
-                      0xFFFF9800,
-                    ), // Color naranja/amarillo como en la imagen
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$badge',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 

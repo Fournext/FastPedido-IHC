@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fast_pedido/widgets/product_card.dart';
 
 class RecommendedScreen extends StatefulWidget {
   final String title;
@@ -162,10 +163,52 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                 ),
                 itemCount: _visible.length,
                 itemBuilder: (context, index) {
-                  return _buildProductCard(_visible[index]);
+                  final product = _visible[index];
+                  final productId = '${product['name']}_${product['price']}';
+                  final isFavorite = _favoriteProducts.contains(productId);
+                  final quantity = _productQuantities[productId] ?? 0;
+
+                  // Card del Producto
+                  return ProductCard(
+                    product: product,
+                    fullWidth: false,
+                    quantity: quantity,
+                    isFavorite: isFavorite,
+                    onAdd: () {
+                      setState(() {
+                        _productQuantities[productId] = quantity + 1;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${product['name']} agregado al carrito',
+                          ),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                    onRemove: () {
+                      setState(() {
+                        if (quantity > 1) {
+                          _productQuantities[productId] = quantity - 1;
+                        } else {
+                          _productQuantities.remove(productId);
+                        }
+                      });
+                    },
+                    onToggleFavorite: () {
+                      setState(() {
+                        if (isFavorite) {
+                          _favoriteProducts.remove(productId);
+                        } else {
+                          _favoriteProducts.add(productId);
+                        }
+                      });
+                    },
+                  );
                 },
               ),
-
               const SizedBox(height: 20),
             ],
           ),
@@ -174,183 +217,5 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
     );
   }
 
-  // 🔹 Tarjeta de producto (idéntica a la del Dashboard)
-  Widget _buildProductCard(Map<String, dynamic> product) {
-    final productId = '${product['name']}_${product['price']}';
-    final isFavorite = _favoriteProducts.contains(productId);
-    final quantity = _productQuantities[productId] ?? 0;
-    final showQuantityControls = quantity > 0;
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            spreadRadius: 0,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                product['image'],
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.shopping_bag,
-                    size: 60,
-                    color: Colors.grey[400],
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            product['price'],
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-          Text(
-            product['name'],
-            style: TextStyle(
-              fontSize: 10.5,
-              height: 1.3,
-              color: Colors.grey[800],
-            ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (showQuantityControls)
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (quantity > 0) {
-                            _productQuantities[productId] = quantity - 1;
-                          }
-                        });
-                      },
-                      child: const Icon(
-                        Icons.remove_circle_outline,
-                        size: 20,
-                        color: Colors.red,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$quantity',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _productQuantities[productId] = quantity + 1;
-                        });
-                      },
-                      child: const Icon(
-                        Icons.add_circle_outline,
-                        size: 20,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _productQuantities[productId] = 1;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${product['name']} agregado al carrito'),
-                        duration: const Duration(seconds: 1),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          spreadRadius: 0,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.add_shopping_cart,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isFavorite) {
-                      _favoriteProducts.remove(productId);
-                    } else {
-                      _favoriteProducts.add(productId);
-                    }
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isFavorite
-                            ? '${product['name']} eliminado de favoritos'
-                            : '${product['name']} agregado a favoritos',
-                      ),
-                      duration: const Duration(seconds: 1),
-                      backgroundColor: isFavorite ? Colors.red : Colors.green,
-                    ),
-                  );
-                },
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  size: 22,
-                  color: isFavorite ? Colors.red : Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // ProductCard is used from widgets/product_card.dart
 }

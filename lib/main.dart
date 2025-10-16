@@ -1,3 +1,4 @@
+import 'package:fast_pedido/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/favorites_screen.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/billing-details': (context) => const BillingDetailsScreen(),
         '/credit-card': (context) => const CreditCardScreen(),
         '/qr-payment': (context) => const QRPaymentScreen(),
+        '/profile': (context) => const ProfileScreen(),
       },
     );
   }
