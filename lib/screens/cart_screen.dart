@@ -212,28 +212,79 @@ class _CartScreenState extends State<CartScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Realizar Compra'),
-          content: Text(
-            '¿Confirmar compra por un total de Bs ${totalAmount.toStringAsFixed(2)}?',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total: Bs ${totalAmount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '¿Cómo quieres realizar tu compra?',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
-            ElevatedButton(
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.pushNamed(
                   context,
                   '/delivery-date',
-                  arguments: {'totalAmount': totalAmount},
+                  arguments: {
+                    'totalAmount': totalAmount,
+                    'deliveryType': 'pickup',
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              icon: const Icon(Icons.store, size: 18),
+              label: const Text('Recoger'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(
+                  context,
+                  '/delivery-date',
+                  arguments: {
+                    'totalAmount': totalAmount,
+                    'deliveryType': 'delivery',
+                  },
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
-              child: const Text('Confirmar'),
+              icon: const Icon(Icons.delivery_dining, size: 18),
+              label: const Text('Delivery'),
             ),
           ],
         );
@@ -314,47 +365,41 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   child: Row(
                     children: [
+                      //Boton de Limpiar Carrito
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
                               _cartQuantities.clear();
                               cartItems.clear();
-                              _suggestionQuantities
-                                  .clear(); // Limpiar también las sugerencias
+                              _suggestionQuantities.clear();
                             });
                           },
                           icon: const Icon(Icons.delete, size: 18),
                           label: const Text('Eliminar Todo'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: Colors.white,
+                            foregroundColor:
+                                Colors.grey[700], // Texto gris oscuro
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
                       ),
+                      //Texto Puntos Ganados
                       const SizedBox(width: 12),
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: const Color.fromARGB(255, 255, 255, 255),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: Colors.grey[300]!,
                               width: 1,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
-                                spreadRadius: 0,
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
                           ),
                           child: Column(
                             children: [
@@ -370,7 +415,7 @@ class _CartScreenState extends State<CartScreen> {
                                   Text(
                                     '${_calculateTotalPoints()} pts',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.grey[700],
                                     ),
@@ -383,7 +428,7 @@ class _CartScreenState extends State<CartScreen> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black87,
-                                  fontSize: 12,
+                                  fontSize: 11,
                                 ),
                               ),
                             ],
@@ -519,7 +564,10 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 // Botón realizar compra
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 5,
+                  ),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -534,7 +582,7 @@ class _CartScreenState extends State<CartScreen> {
                             ? Colors.grey
                             : Colors.red,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

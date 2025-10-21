@@ -15,6 +15,7 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
   bool showTimeSelector = false;
 
   double? _totalAmount;
+  String? _deliveryType;
 
   // Controladores para los campos de tiempo
   late TextEditingController _hourController;
@@ -34,10 +35,11 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Obtener el total pasado desde la pantalla anterior
+    // Obtener el total y tipo de entrega pasados desde la pantalla anterior
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _totalAmount = arguments?['totalAmount'];
+    _deliveryType = arguments?['deliveryType'];
   }
 
   @override
@@ -52,9 +54,9 @@ class _DeliveryDateScreenState extends State<DeliveryDateScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Fecha de Entrega',
-          style: TextStyle(
+        title: Text(
+          _deliveryType == 'pickup' ? 'Fecha para Recoger' : 'Fecha de Entrega',
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
