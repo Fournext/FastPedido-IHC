@@ -23,7 +23,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleSpacing: 0,
       title: Row(
         children: [
-          // 🟢 Logo
           Image.asset(
             'assets/images/logo.png',
             height: 45,
@@ -40,8 +39,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
           ),
           const SizedBox(width: 8),
-
-          // 🔴 Nombre "FastPedido"
           const Text(
             'FastPedido',
             style: TextStyle(
@@ -56,7 +53,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
           const Spacer(),
 
-          // ⚫ Título derecho (Ofertas) con más espacio al borde
           Padding(
             padding: const EdgeInsets.only(right: 16), // ← espacio agregado
             child: Text(

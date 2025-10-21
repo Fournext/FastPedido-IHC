@@ -4,6 +4,8 @@ import 'package:fast_pedido/widgets/custom_appbar.dart';
 import 'package:fast_pedido/widgets/offer_header.dart';
 import 'package:fast_pedido/widgets/offers_grid.dart';
 import 'package:fast_pedido/widgets/search_bar.dart';
+import 'package:fast_pedido/widgets/bottom_menu.dart';
+import 'package:fast_pedido/screens/dashboard_screen.dart';
 
 class OffersScreen extends StatefulWidget {
   const OffersScreen({super.key});
@@ -18,6 +20,10 @@ class _OffersScreenState extends State<OffersScreen> {
   final offers = ProductsData.allOffers;
 
   String _query = '';
+  String _selectedMenu = '';
+
+  int get _cartItemCount =>
+      _quantities.values.fold(0, (sum, qty) => sum + qty);
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +35,11 @@ class _OffersScreenState extends State<OffersScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: const CustomAppBar(title: 'Ofertas'),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Barra de búsqueda reutilizable con icono de filtro
             SearchBarWidget(
               hintText: 'Buscar ofertas...',
               onChanged: (text) => setState(() => _query = text),
@@ -54,7 +60,6 @@ class _OffersScreenState extends State<OffersScreen> {
             ),
             const SizedBox(height: 16),
 
-            //  Grid de ofertas filtradas
             Expanded(
               child: OffersGrid(
                 offers: filteredOffers,
@@ -76,6 +81,59 @@ class _OffersScreenState extends State<OffersScreen> {
             ),
           ],
         ),
+      ),
+
+      //  Menú inferior funcional
+      bottomNavigationBar: BottomMenu(
+        selected: _selectedMenu,
+        cartBadge: _cartItemCount > 0 ? _cartItemCount : null,
+
+        // Favoritos
+        onFavorites: () {
+          setState(() => _selectedMenu = 'favorites');
+          Navigator.pushNamed(context, '/favorites', arguments: {
+            'dashboardFavorites': _favorites.toList(),
+            'dashboardFavoriteProducts': offers
+                .where((p) => _favorites
+                    .contains('${p['name']}_${p['price']}'))
+                .toList(),
+          });
+        },
+
+        // Delivery (te lleva al dashboard principal)
+        onDelivery: () {
+          setState(() => _selectedMenu = 'delivery');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          );
+        },
+
+        // Carrito
+        onCart: () {
+          setState(() => _selectedMenu = 'cart');
+          final cartProducts = offers
+              .where((p) =>
+                  (_quantities['${p['name']}_${p['price']}'] ?? 0) > 0)
+              .map((p) => {
+                    'name': p['name'],
+                    'price': p['price'],
+                    'image': p['image'],
+                    'quantity': _quantities['${p['name']}_${p['price']}'],
+                  })
+              .toList();
+          Navigator.pushNamed(context, '/cart', arguments: {
+            'dashboardProducts': cartProducts,
+            'dashboardFavoriteProducts': [],
+            'currentPoints': 0,
+          });
+        },
+
+        //  Perfil
+        onProfile: () {
+          setState(() => _selectedMenu = 'profile');
+          Navigator.pushNamed(context, '/profile');
+        },
       ),
     );
   }

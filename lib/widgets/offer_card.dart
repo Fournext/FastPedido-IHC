@@ -4,18 +4,18 @@ class OfferCard extends StatelessWidget {
   final Map<String, dynamic> product;
   final bool isFavorite;
   final int quantity;
-  final VoidCallback onAdd;
-  final VoidCallback onRemove;
-  final VoidCallback onToggleFavorite;
+  final VoidCallback? onAdd;
+  final VoidCallback? onRemove;
+  final VoidCallback? onToggleFavorite;
 
   const OfferCard({
     super.key,
     required this.product,
-    required this.isFavorite,
-    required this.quantity,
-    required this.onAdd,
-    required this.onRemove,
-    required this.onToggleFavorite,
+    this.isFavorite = false,
+    this.quantity = 0,
+    this.onAdd,
+    this.onRemove,
+    this.onToggleFavorite,
   });
 
   @override
@@ -25,130 +25,154 @@ class OfferCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagen + badge
+          // Imagen con badge
           Expanded(
-            flex: 3,
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Container(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                  child: Image.asset(
+                    product['image'],
+                    fit: BoxFit.contain,
                     width: double.infinity,
-                    color: const Color(0xFFFDFDFD),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Image.asset(
-                        product['image'],
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.shopping_bag, size: 60, color: Colors.grey),
-                      ),
-                    ),
+                    height: double.infinity,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.shopping_bag, size: 60, color: Colors.grey),
                   ),
                 ),
                 if (product.containsKey('discount'))
                   Positioned(
-                    top: 8,
-                    right: 8,
+                    top: 6,
+                    right: 6,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Text(
                         '-${product['discount']}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
               ],
             ),
           ),
+          const SizedBox(height: 6),
 
-          // Información del producto
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Precios
-                  Row(
-                    children: [
-                      Text(
-                        product['price'],
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      if (product.containsKey('originalPrice')) ...[
-                        const SizedBox(width: 6),
-                        Text(
-                          product['originalPrice'],
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            decoration: TextDecoration.lineThrough,
-                          ),
-                        ),
-                      ]
-                    ],
+          // Precio actual y anterior
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  product['price'],
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                  const SizedBox(height: 4),
-
-                  // Nombre
-                  Expanded(
+                ),
+                const SizedBox(width: 6),
+                if (product.containsKey('originalPrice'))
+                  Flexible(
                     child: Text(
-                      product['name'],
-                      style: const TextStyle(fontSize: 11, color: Colors.black87, height: 1.2),
-                      maxLines: 3,
+                      product['originalPrice'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey,
+                        decoration: TextDecoration.lineThrough,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 8),
+              ],
+            ),
+          ),
 
-                  // Controles
+          // Nombre del producto
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            child: Text(
+              product['name'],
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.black87,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          // Controles
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (showQuantityControls)
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      showQuantityControls
-                          ? Row(children: [
-                              GestureDetector(onTap: onRemove, child: const Icon(Icons.remove_circle_outline, size: 18, color: Colors.red)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
-                                child: Text('$quantity', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                              GestureDetector(onTap: onAdd, child: const Icon(Icons.add_circle_outline, size: 18, color: Colors.red)),
-                            ])
-                          : GestureDetector(
-                              onTap: onAdd,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                child: const Icon(Icons.add_shopping_cart, size: 14, color: Colors.white),
-                              ),
-                            ),
                       GestureDetector(
-                        onTap: onToggleFavorite,
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                          size: 20,
-                        ),
+                        onTap: onRemove,
+                        child: const Icon(Icons.remove_circle_outline,
+                            size: 18, color: Colors.red),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text('$quantity',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                      ),
+                      GestureDetector(
+                        onTap: onAdd,
+                        child: const Icon(Icons.add_circle_outline,
+                            size: 18, color: Colors.red),
                       ),
                     ],
+                  )
+                else
+                  GestureDetector(
+                    onTap: onAdd,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.add_shopping_cart,
+                          size: 14, color: Colors.white),
+                    ),
                   ),
-                ],
-              ),
+                GestureDetector(
+                  onTap: onToggleFavorite,
+                  child: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : Colors.grey,
+                    size: 20,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
