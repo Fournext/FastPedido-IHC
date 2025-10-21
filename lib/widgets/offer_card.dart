@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+/// Widget que representa una tarjeta de oferta de producto.
+/// Muestra la imagen, precio, descuento, controles de cantidad y botón de favorito.
 class OfferCard extends StatelessWidget {
-  final Map<String, dynamic> product;
-  final bool isFavorite;
-  final int quantity;
-  final VoidCallback? onAdd;
-  final VoidCallback? onRemove;
-  final VoidCallback? onToggleFavorite;
+  final Map<String, dynamic> product;  /// Información del producto (nombre, precio, imagen, descuento, etc.)
+  final bool isFavorite;/// Indica si el producto está marcado como favorito
+  final int quantity;  /// Cantidad actual del producto seleccionada
+  final VoidCallback? onAdd;/// Callback ejecutado cuando se presiona el botón de añadir
+  final VoidCallback? onRemove;/// Callback ejecutado cuando se presiona el botón de remover
+  final VoidCallback? onToggleFavorite;/// Callback ejecutado cuando se presiona el botón de favorito
 
   const OfferCard({
     super.key,
@@ -20,6 +22,8 @@ class OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// Determina si se deben mostrar los controles de cantidad
+    /// Se muestran solo cuando hay al menos un item seleccionado
     final showQuantityControls = quantity > 0;
 
     return Container(
@@ -38,7 +42,8 @@ class OfferCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagen con badge
+          /// Sección superior: Imagen del producto con badge de descuento
+          /// La imagen se ajusta al contenedor manteniendo su proporción
           Expanded(
             child: Stack(
               children: [
@@ -78,7 +83,8 @@ class OfferCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
 
-          // Precio actual y anterior
+          /// Sección de precios: Muestra el precio actual en rojo
+          /// y el precio original tachado (si existe)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
@@ -109,7 +115,8 @@ class OfferCard extends StatelessWidget {
             ),
           ),
 
-          // Nombre del producto
+          /// Nombre del producto: Limitado a 2 líneas con ellipsis
+          /// si el texto es demasiado largo
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             child: Text(
@@ -124,7 +131,8 @@ class OfferCard extends StatelessWidget {
             ),
           ),
 
-          // Controles
+          /// Sección inferior: Controles de cantidad y botón de favorito
+          /// Muestra controles +/- si hay items seleccionados, o botón de añadir si no hay items
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(

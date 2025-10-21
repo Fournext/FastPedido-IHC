@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// Widget que representa una barra de búsqueda con botón de filtro.
+/// Incluye un campo de texto para búsqueda y un botón de filtro adicional.
 class SearchBarWidget extends StatelessWidget {
-  final String hintText;
-  final ValueChanged<String>? onChanged;
-  final VoidCallback? onFilterPressed;
+  final String hintText;/// Texto que se muestra como placeholder en el campo de búsqueda
+  final ValueChanged<String>? onChanged;/// Callback que se ejecuta cada vez que cambia el texto de búsqueda
+  final VoidCallback? onFilterPressed;  /// Callback que se ejecuta cuando se presiona el botón de filtro
 
   const SearchBarWidget({
     super.key,
@@ -16,7 +18,7 @@ class SearchBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Campo de búsqueda
+        /// Campo de búsqueda: Ocupa el espacio disponible y tiene un fondo gris claro
         Expanded(
           child: Container(
             height: 48,
@@ -50,7 +52,7 @@ class SearchBarWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        // Botón de filtro
+        /// Botón de filtro: Contenedor cuadrado con icono de filtro
         GestureDetector(
           onTap: onFilterPressed,
           child: Container(

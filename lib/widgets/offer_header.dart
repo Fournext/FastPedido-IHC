@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Widget que representa el encabezado de la sección de ofertas.
+/// Muestra un banner con gradiente rojo que contiene un título y subtítulo.
 class OfferHeader extends StatelessWidget {
+  /// Título principal del encabezado
   final String title;
+
+  /// Subtítulo o descripción secundaria
   final String subtitle;
 
   const OfferHeader({

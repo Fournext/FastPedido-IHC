@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'offer_card.dart';
 
+/// Widget que muestra una cuadrícula de tarjetas de ofertas.
+/// Permite la interacción con cada oferta (añadir/remover del carrito, marcar como favorito).
 class OffersGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> offers;
-  final Set<String> favorites;
-  final Map<String, int> quantities;
-  final void Function(String id) onAdd;
-  final void Function(String id) onRemove;
-  final void Function(String id) onToggleFavorite;
+  final List<Map<String, dynamic>> offers;  /// Lista de productos en oferta
+  final Set<String> favorites;  /// Conjunto de IDs de productos marcados como favoritos
+  final Map<String, int> quantities;  /// Mapa de cantidades seleccionadas por producto
+  /// La clave es el ID del producto (nombre_precio)
+
+  final void Function(String id) onAdd;  /// Callback cuando se añade un producto al carrito
+  final void Function(String id) onRemove;  /// Callback cuando se remueve un producto del carrito  
+  final void Function(String id) onToggleFavorite;/// Callback cuando se toggle el estado de favorito
 
   const OffersGrid({
     super.key,

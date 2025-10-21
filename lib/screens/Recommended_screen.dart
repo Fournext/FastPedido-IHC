@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
 
+/// Pantalla que muestra los productos recomendados en una cuadrícula.
+/// Permite buscar productos, filtrarlos, añadirlos al carrito y marcarlos como favoritos.
 class RecommendedScreen extends StatefulWidget {
+  /// Título de la sección de recomendados
   final String title;
+
+  /// Lista de productos recomendados con sus detalles
+  /// Cada producto es un Map que contiene nombre, precio, imagen, etc.
   final List<Map<String, dynamic>> products;
 
   const RecommendedScreen({
@@ -16,16 +22,23 @@ class RecommendedScreen extends StatefulWidget {
 }
 
 class _RecommendedScreenState extends State<RecommendedScreen> {
+  /// Conjunto que almacena los IDs de los productos marcados como favoritos
+  /// El ID se forma concatenando el nombre y precio del producto
   Set<String> _favoriteProducts = {};
+
+  /// Mapa que almacena la cantidad seleccionada de cada producto
+  /// La clave es el ID del producto (nombre_precio)
+  /// El valor es la cantidad seleccionada
   Map<String, int> _productQuantities = {};
 
-  // Cargamos todos los productos al iniciar (sin paginación)
+  /// Lista de productos visibles en la pantalla
+  /// Se inicializa con todos los productos disponibles
   late List<Map<String, dynamic>> _visible;
 
   @override
   void initState() {
     super.initState();
-    _visible = List.from(widget.products); // 👈 muestra todos los productos
+    _visible = List.from(widget.products); //  muestra todos los productos
   }
 
   @override
@@ -168,12 +181,17 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                   final isFavorite = _favoriteProducts.contains(productId);
                   final quantity = _productQuantities[productId] ?? 0;
 
-                  // Card del Producto
+                  /// Renderiza una tarjeta de producto con sus controles
+                  /// - Muestra imagen, nombre y precio del producto
+                  /// - Permite añadir/quitar del carrito
+                  /// - Permite marcar/desmarcar como favorito
                   return ProductCard(
                     product: product,
                     fullWidth: false,
                     quantity: quantity,
                     isFavorite: isFavorite,
+                    /// Callback cuando se añade un producto al carrito
+                    /// Incrementa la cantidad y muestra una notificación
                     onAdd: () {
                       setState(() {
                         _productQuantities[productId] = quantity + 1;
@@ -188,6 +206,8 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                         ),
                       );
                     },
+                    /// Callback cuando se remueve un producto del carrito
+                    /// Decrementa la cantidad o remueve el producto si la cantidad es 1
                     onRemove: () {
                       setState(() {
                         if (quantity > 1) {
@@ -197,6 +217,8 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                         }
                       });
                     },
+                    /// Callback para alternar el estado de favorito del producto
+                    /// Añade o remueve el producto del conjunto de favoritos
                     onToggleFavorite: () {
                       setState(() {
                         if (isFavorite) {

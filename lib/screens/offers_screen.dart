@@ -7,6 +7,8 @@ import 'package:fast_pedido/widgets/search_bar.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/screens/dashboard_screen.dart';
 
+/// Pantalla que muestra las ofertas disponibles en la aplicación.
+/// Permite a los usuarios ver, buscar, añadir al carrito y marcar ofertas como favoritas.
 class OffersScreen extends StatefulWidget {
   const OffersScreen({super.key});
 
@@ -15,18 +17,28 @@ class OffersScreen extends StatefulWidget {
 }
 
 class _OffersScreenState extends State<OffersScreen> {
-  final Set<String> _favorites = {};
+  final Set<String> _favorites = {};/// Conjunto de IDs de productos marcados como favoritos
+
+  /// Mapa que almacena la cantidad seleccionada de cada producto
+  /// La clave es el ID del producto (nombre_precio)
+  /// El valor es la cantidad seleccionada
   final Map<String, int> _quantities = {};
-  final offers = ProductsData.allOffers;
 
-  String _query = '';
-  String _selectedMenu = '';
+  final offers = ProductsData.allOffers;/// Lista de todas las ofertas disponibles
 
+  String _query = '';  /// Texto actual en la barra de búsqueda
+  String _selectedMenu = '';/// Ítem seleccionado en el menú inferior
+
+  /// Calcula el número total de items en el carrito
+  /// Suma todas las cantidades de productos seleccionados
   int get _cartItemCount =>
       _quantities.values.fold(0, (sum, qty) => sum + qty);
 
   @override
   Widget build(BuildContext context) {
+    /// Filtra las ofertas basado en el texto de búsqueda
+    /// Convierte tanto el nombre del producto como la búsqueda a minúsculas
+    /// para hacer la búsqueda insensible a mayúsculas/minúsculas
     final filteredOffers = offers
         .where((p) =>
             p['name'].toString().toLowerCase().contains(_query.toLowerCase()))
@@ -83,12 +95,15 @@ class _OffersScreenState extends State<OffersScreen> {
         ),
       ),
 
-      //  Menú inferior funcional
+       //  Menú inferior funcional
       bottomNavigationBar: BottomMenu(
         selected: _selectedMenu,
+        /// Muestra el número de items en el carrito como badge
+        /// Si no hay items, no muestra ningún badge (null)
         cartBadge: _cartItemCount > 0 ? _cartItemCount : null,
 
-        // Favoritos
+        /// Navega a la pantalla de favoritos y pasa los productos marcados
+        /// como favoritos como argumentos
         onFavorites: () {
           setState(() => _selectedMenu = 'favorites');
           Navigator.pushNamed(context, '/favorites', arguments: {
@@ -100,7 +115,9 @@ class _OffersScreenState extends State<OffersScreen> {
           });
         },
 
-        // Delivery (te lleva al dashboard principal)
+        /// Navega al dashboard principal (pantalla de delivery)
+        /// Usa pushReplacement para reemplazar la pantalla actual en el stack
+        /// de navegación
         onDelivery: () {
           setState(() => _selectedMenu = 'delivery');
           Navigator.pushReplacement(
@@ -109,7 +126,8 @@ class _OffersScreenState extends State<OffersScreen> {
           );
         },
 
-        // Carrito
+        /// Navega a la pantalla del carrito y pasa los productos seleccionados
+        /// como argumentos, incluyendo sus cantidades
         onCart: () {
           setState(() => _selectedMenu = 'cart');
           final cartProducts = offers
@@ -129,7 +147,7 @@ class _OffersScreenState extends State<OffersScreen> {
           });
         },
 
-        //  Perfil
+        /// Navega a la pantalla de perfil del usuario
         onProfile: () {
           setState(() => _selectedMenu = 'profile');
           Navigator.pushNamed(context, '/profile');
