@@ -4,6 +4,7 @@ import 'offers_screen.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
 import 'package:fast_pedido/data/products_data.dart';
+import 'package:fast_pedido/data/session_state.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -62,41 +63,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
         toolbarHeight: 70,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 45,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+            // 🔹 Logo + texto
+            Row(
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 45,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.delivery_dining,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'FastPedido',
+                  style: TextStyle(
                     color: Colors.red,
-                    borderRadius: BorderRadius.circular(8),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.red,
+                    decorationThickness: 2.5,
                   ),
-                  child: const Icon(
-                    Icons.delivery_dining,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                );
-              },
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            const Text(
-              'FastPedido',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.red,
-                decorationThickness: 2.5,
+
+            // 🔹 Botón dinámico de sesión
+            ElevatedButton(
+              onPressed: () async {
+                if (SessionState.isLoggedIn) {
+                  Navigator.pushNamed(context, '/profile');
+                } else {
+                  // 👇 Cuando el login termine, refrescamos el dashboard
+                  await Navigator.pushNamed(context, '/login');
+                  setState(() {}); // 🔁 Refresca el botón al volver
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: SessionState.isLoggedIn
+                    ? Colors.green
+                    : Colors.red,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                SessionState.isLoggedIn ? 'Mi cuenta' : 'Sign in',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
