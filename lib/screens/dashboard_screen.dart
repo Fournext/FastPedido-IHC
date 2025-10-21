@@ -108,7 +108,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (SessionState.isLoggedIn) {
                   Navigator.pushNamed(context, '/profile');
                 } else {
-                  // 👇 Cuando el login termine, refrescamos el dashboard
+                  // Cuando el login termine, refrescamos el dashboard
                   await Navigator.pushNamed(context, '/login');
                   setState(() {}); // 🔁 Refresca el botón al volver
                 }

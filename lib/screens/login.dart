@@ -127,30 +127,39 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                // Recordar sesión
-                Row(
+
+                // Recordar sesión + Olvidaste tu contraseña centrado abajo
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _rememberMe = value ?? false;
-                        });
-                      },
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberMe = value ?? false;
+                            });
+                          },
+                        ),
+                        const Text('Recordar sesión'),
+                      ],
                     ),
-                    const Text('Recordar sesión'),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () {
-                        // Implementar recuperación de contraseña
-                      },
-                      child: const Text(
-                        '¿Olvidaste tu contraseña?',
-                        style: TextStyle(color: Colors.red),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          // Implementar recuperación de contraseña
+                        },
+                        child: const Text(
+                          '¿Olvidaste tu contraseña?',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 24),
                 // Botón de inicio de sesión
                 ElevatedButton(
