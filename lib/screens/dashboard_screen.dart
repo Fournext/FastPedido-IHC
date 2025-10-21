@@ -5,6 +5,7 @@ import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
 import 'package:fast_pedido/data/products_data.dart';
 import 'package:fast_pedido/data/session_state.dart';
+import 'package:fast_pedido/services/points_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,34 +18,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _selectedCategory;
   Set<String> _favoriteProducts = {};
   Map<String, int> _productQuantities = {};
-  int _userPoints = 0; // Puntos del usuario
+  final PointsService _pointsService = PointsService();
 
   // Calculamos dinámicamente el número de items en el carrito
   int get _cartItemCount {
     return _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
-  }
-
-  // Método para calcular puntos basado en el precio del producto
-  int _calculatePointsForProduct(String price) {
-    final priceMatch = RegExp(r'\d+').firstMatch(price);
-    if (priceMatch != null) {
-      final matchedString = priceMatch.group(0) ?? '0';
-      final points = int.tryParse(matchedString) ?? 1;
-      return points; // Solo la parte entera
-    }
-    return 1; // Punto mínimo si no se puede calcular
-  }
-
-  // Método para actualizar puntos cuando se agrega/quita un producto
-  void _updatePoints(String productPrice, bool isAdding) {
-    final points = _calculatePointsForProduct(productPrice);
-    setState(() {
-      if (isAdding) {
-        _userPoints += points;
-      } else {
-        _userPoints = (_userPoints - points).clamp(0, double.infinity).toInt();
-      }
-    });
   }
 
   // Datos centralizados desde ProductsData
@@ -198,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Icon(Icons.stars, color: Colors.grey[600], size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          '$_userPoints pts',
+                          '${_pointsService.userPoints} pts',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[700],
@@ -332,7 +310,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         setState(() {
                           _productQuantities[productId] = quantity + 1;
                         });
-                        _updatePoints(product['price'], true);
+                        _pointsService.updatePoints(
+                          product['price'],
+                          isAdding: true,
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -351,7 +332,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _productQuantities.remove(productId);
                           }
                         });
-                        _updatePoints(product['price'], false);
+                        _pointsService.updatePoints(
+                          product['price'],
+                          isAdding: false,
+                        );
                       },
                       onToggleFavorite: () {
                         setState(() {
@@ -423,7 +407,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             setState(() {
                               _productQuantities[productId] = quantity + 1;
                             });
-                            _updatePoints(product['price'], true);
+                            _pointsService.updatePoints(
+                              product['price'],
+                              isAdding: true,
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -442,7 +429,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 _productQuantities.remove(productId);
                               }
                             });
-                            _updatePoints(product['price'], false);
+                            _pointsService.updatePoints(
+                              product['price'],
+                              isAdding: false,
+                            );
                           },
                           onToggleFavorite: () {
                             setState(() {
@@ -597,7 +587,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   setState(() {
                     _productQuantities[productId] = quantity + 1;
                   });
-                  _updatePoints(product['price'], true);
+                  _pointsService.updatePoints(product['price'], isAdding: true);
                 },
                 onRemove: () {
                   setState(() {
@@ -607,7 +597,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _productQuantities.remove(productId);
                     }
                   });
-                  _updatePoints(product['price'], false);
+                  _pointsService.updatePoints(
+                    product['price'],
+                    isAdding: false,
+                  );
                 },
                 onToggleFavorite: () {
                   setState(() {
@@ -662,7 +655,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         dashboardProducts.add({
           'name': offer['name'],
           'pricePerUnit': offer['price'],
-          'totalPrice': offer['price'], // Se calculará en el carrito
+          'totalPrice': offer['price'],
           'image': offer['image'],
           'id': productId,
           'quantity': quantity,
@@ -678,7 +671,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         dashboardProducts.add({
           'name': recommended['name'],
           'pricePerUnit': recommended['price'],
-          'totalPrice': recommended['price'], // Se calculará en el carrito
+          'totalPrice': recommended['price'],
           'image': recommended['image'],
           'id': productId,
           'quantity': quantity,
@@ -696,7 +689,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           dashboardProducts.add({
             'name': product['name'],
             'pricePerUnit': product['price'],
-            'totalPrice': product['price'], // Se calculará en el carrito
+            'totalPrice': product['price'],
             'image': product['image'],
             'id': productId,
             'quantity': quantity,
@@ -705,16 +698,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     }
 
-    // Navegar al carrito con los productos
+    // Navegar al carrito y refrescar puntos al volver
     Navigator.pushNamed(
       context,
       '/cart',
       arguments: {
         'dashboardProducts': dashboardProducts,
         'dashboardFavoriteProducts': dashboardFavoritesToSend,
-        'currentPoints': _userPoints, // Enviar puntos actuales
+        'currentPoints': _pointsService.userPoints,
       },
-    );
+    ).then((_) {
+      setState(() {}); // Refresca puntos al regresar al Dashboard
+    });
 
     // Limpiar las cantidades del dashboard después de enviar al carrito
     setState(() {

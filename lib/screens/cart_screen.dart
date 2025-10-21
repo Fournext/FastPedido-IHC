@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
 import 'package:fast_pedido/data/products_data.dart';
+import 'package:fast_pedido/services/points_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -12,6 +13,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   Map<String, int> _cartQuantities = {};
+  final PointsService _pointsService = PointsService();
 
   // Variables para manejar las sugerencias
   Set<String> _favoriteSuggestions = {};
@@ -97,9 +99,8 @@ class _CartScreenState extends State<CartScreen> {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (arguments != null) {
       // Recibir puntos del dashboard
-      if (arguments['currentPoints'] != null) {
-        _dashboardPoints = arguments['currentPoints'] as int;
-      }
+      _dashboardPoints = _pointsService.userPoints;
+
       // Procesar productos del dashboard
       if (arguments['dashboardProducts'] != null) {
         _addDashboardProducts(
@@ -144,12 +145,6 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
     setState(() {});
-  }
-
-  // Método para calcular puntos de un producto
-  int _calculatePointsForProduct(String priceString) {
-    double unitPrice = _extractPrice(priceString);
-    return unitPrice.floor(); // Solo la parte entera
   }
 
   void _transferSuggestionToCart(
@@ -372,7 +367,11 @@ class _CartScreenState extends State<CartScreen> {
                             setState(() {
                               _cartQuantities.clear();
                               cartItems.clear();
-                              _suggestionQuantities.clear();
+                              _suggestionQuantities
+                                  .clear(); // Limpiar también las sugerencias
+                              _pointsService
+                                  .reset(); // Reinicia los puntos globalmente
+                              _totalPoints = 0;
                             });
                           },
                           icon: const Icon(Icons.delete, size: 18),
@@ -413,7 +412,7 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${_calculateTotalPoints()} pts',
+                                    '${_pointsService.userPoints} pts',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -508,13 +507,14 @@ class _CartScreenState extends State<CartScreen> {
                                   1,
                                 );
                               });
-                              int pointsGained = _calculatePointsForProduct(
+                              _pointsService.updatePoints(
                                 product['price'],
+                                isAdding: true,
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    '${product['name']} agregado al carrito (+$pointsGained pts)',
+                                    '${product['name']} agregado al carrito (+${_pointsService.userPoints} pts)',
                                   ),
                                   duration: const Duration(seconds: 1),
                                   backgroundColor: Colors.green,
@@ -536,6 +536,11 @@ class _CartScreenState extends State<CartScreen> {
                                   _removeFromCart(productId);
                                 }
                               });
+
+                              _pointsService.updatePoints(
+                                product['price'],
+                                isAdding: false,
+                              );
                             },
                             onToggleFavorite: () {
                               setState(() {
@@ -716,12 +721,19 @@ class _CartScreenState extends State<CartScreen> {
                         if (quantity > 1) {
                           int newQuantity = quantity - 1;
                           _cartQuantities[item['id']] = newQuantity;
+
                           // Recalcular el precio total
                           double unitPrice = _extractPrice(
                             item['pricePerUnit'],
                           );
                           item['totalPrice'] =
                               'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+
+                          //  Restar puntos
+                          _pointsService.updatePoints(
+                            item['pricePerUnit'],
+                            isAdding: false,
+                          );
                         } else {
                           // Si la cantidad es 1, eliminar el producto del carrito
                           String productId = item['id'];
@@ -729,12 +741,17 @@ class _CartScreenState extends State<CartScreen> {
                           cartItems.removeWhere(
                             (cartItem) => cartItem['id'] == productId,
                           );
-                          _suggestionQuantities.remove(
-                            productId,
-                          ); // También limpiar de sugerencias
+                          _suggestionQuantities.remove(productId);
+
+                          //  Restar puntos del producto eliminado
+                          _pointsService.updatePoints(
+                            item['pricePerUnit'],
+                            isAdding: false,
+                          );
                         }
                       });
                     },
+
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       child: const Icon(
@@ -762,6 +779,11 @@ class _CartScreenState extends State<CartScreen> {
                         double unitPrice = _extractPrice(item['pricePerUnit']);
                         item['totalPrice'] =
                             'Bs. ${(unitPrice * newQuantity).toStringAsFixed(2)}';
+                        // 🔹 Sumar puntos al incrementar
+                        _pointsService.updatePoints(
+                          item['pricePerUnit'],
+                          isAdding: true,
+                        );
                       });
                     },
                     child: Container(
@@ -788,6 +810,11 @@ class _CartScreenState extends State<CartScreen> {
                     _suggestionQuantities.remove(
                       productId,
                     ); // También limpiar de sugerencias
+                    // Restar puntos al eliminar todo
+                    _pointsService.updatePoints(
+                      item['pricePerUnit'],
+                      isAdding: false,
+                    );
                   });
                 },
                 child: Container(
