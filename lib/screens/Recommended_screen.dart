@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
+import 'package:fast_pedido/widgets/search_bar.dart';
+import 'package:fast_pedido/widgets/bottom_menu.dart';
+import 'package:fast_pedido/data/products_data.dart';
 
 class RecommendedScreen extends StatefulWidget {
   final String title;
@@ -18,14 +21,29 @@ class RecommendedScreen extends StatefulWidget {
 class _RecommendedScreenState extends State<RecommendedScreen> {
   Set<String> _favoriteProducts = {};
   Map<String, int> _productQuantities = {};
-
-  // Cargamos todos los productos al iniciar (sin paginación)
   late List<Map<String, dynamic>> _visible;
+  String? _selectedCategory;
+  int _userPoints = 0;
+
+  // ✅ Igual que en Dashboard: getter para contar ítems
+  int get _cartItemCount {
+    return _productQuantities.values.fold<int>(
+      0,
+      (sum, quantity) => sum + quantity,
+    );
+  }
+
+  // Datos centralizados desde ProductsData
+  List<Map<String, dynamic>> get categories => ProductsData.categories;
+  Map<String, List<Map<String, dynamic>>> get productsByCategory =>
+      ProductsData.productsByCategory;
+  List<Map<String, dynamic>> get offers => ProductsData.offers;
+  List<Map<String, dynamic>> get recommended => ProductsData.recommended;
 
   @override
   void initState() {
     super.initState();
-    _visible = List.from(widget.products); // 👈 muestra todos los productos
+    _visible = List.from(widget.products);
   }
 
   @override
@@ -73,77 +91,73 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                 decorationThickness: 2.5,
               ),
             ),
-            const Spacer(),
           ],
         ),
       ),
+
+      // ✅ Igual que el Dashboard: menú inferior reutilizado
+      bottomNavigationBar: BottomMenu(
+        cartBadge: _cartItemCount > 0 ? _cartItemCount : null,
+        onFavorites: () {
+          List<Map<String, dynamic>> dashboardFavoritesToSend = [];
+          _collectFavoriteProducts(offers, dashboardFavoritesToSend);
+          _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
+
+          if (_selectedCategory != null) {
+            final products = productsByCategory[_selectedCategory] ?? [];
+            _collectFavoriteProducts(products, dashboardFavoritesToSend);
+          }
+
+          Navigator.pushNamed(
+            context,
+            '/favorites',
+            arguments: {
+              'dashboardFavorites': _favoriteProducts.toList(),
+              'dashboardFavoriteProducts': dashboardFavoritesToSend,
+            },
+          );
+        },
+        onDelivery: () => Navigator.pushNamed(context, '/orders'),
+        onCart: () => _navigateToCart(),
+        onProfile: () => Navigator.pushNamed(context, '/profile'),
+        selected: '',
+      ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Barra de búsqueda
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Buscar productos...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 13,
+              // 🔹 Barra de búsqueda reutilizable
+              SearchBarWidget(
+                hintText: 'Buscar productos...',
+                onChanged: (query) {
+                  setState(() {
+                    _visible = widget.products
+                        .where(
+                          (p) => p['name'].toString().toLowerCase().contains(
+                            query.toLowerCase(),
                           ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.grey[400],
-                            size: 22,
-                          ),
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 0,
-                          ),
-                        ),
-                      ),
+                        )
+                        .toList();
+                  });
+                },
+                onFilterPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Función de filtro próximamente'),
+                      duration: Duration(seconds: 1),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.filter_list,
-                      color: Colors.grey,
-                      size: 22,
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
-              // Título “Productos Recomendados”
-              const Text(
-                'Productos Recomendados',
-                style: TextStyle(
+              // 🔹 Título de la pantalla
+              Text(
+                "Productos Recomendados",
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
@@ -151,7 +165,7 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Grid con todos los productos
+              // 🔹 Grid de productos recomendados
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -168,7 +182,6 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                   final isFavorite = _favoriteProducts.contains(productId);
                   final quantity = _productQuantities[productId] ?? 0;
 
-                  // Card del Producto
                   return ProductCard(
                     product: product,
                     fullWidth: false,
@@ -205,11 +218,25 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
                           _favoriteProducts.add(productId);
                         }
                       });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFavorite
+                                ? '${product['name']} eliminado de favoritos'
+                                : '${product['name']} agregado a favoritos',
+                          ),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: isFavorite
+                              ? Colors.orange
+                              : Colors.green,
+                        ),
+                      );
                     },
                   );
                 },
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 80), // espacio para el menú inferior
             ],
           ),
         ),
@@ -217,5 +244,102 @@ class _RecommendedScreenState extends State<RecommendedScreen> {
     );
   }
 
-  // ProductCard is used from widgets/product_card.dart
+  void _navigateToCart() {
+    // Preparar los productos del dashboard para enviar al carrito
+    List<Map<String, dynamic>> dashboardProducts = [];
+    List<Map<String, dynamic>> dashboardFavoritesToSend = [];
+
+    // Recopilar productos favoritos del dashboard con sus datos completos
+    _collectFavoriteProducts(offers, dashboardFavoritesToSend);
+    _collectFavoriteProducts(recommended, dashboardFavoritesToSend);
+
+    if (_selectedCategory != null) {
+      final products = productsByCategory[_selectedCategory] ?? [];
+      _collectFavoriteProducts(products, dashboardFavoritesToSend);
+    }
+
+    // Revisar ofertas con cantidades
+    for (var offer in offers) {
+      final productId = '${offer['name']}_${offer['price']}';
+      final quantity = _productQuantities[productId] ?? 0;
+      if (quantity > 0) {
+        dashboardProducts.add({
+          'name': offer['name'],
+          'pricePerUnit': offer['price'],
+          'totalPrice': offer['price'], // Se calculará en el carrito
+          'image': offer['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Revisar recomendados con cantidades
+    for (var recommended in recommended) {
+      final productId = '${recommended['name']}_${recommended['price']}';
+      final quantity = _productQuantities[productId] ?? 0;
+      if (quantity > 0) {
+        dashboardProducts.add({
+          'name': recommended['name'],
+          'pricePerUnit': recommended['price'],
+          'totalPrice': recommended['price'], // Se calculará en el carrito
+          'image': recommended['image'],
+          'id': productId,
+          'quantity': quantity,
+        });
+      }
+    }
+
+    // Revisar productos de categorías con cantidades
+    if (_selectedCategory != null) {
+      final products = productsByCategory[_selectedCategory] ?? [];
+      for (var product in products) {
+        final productId = '${product['name']}_${product['price']}';
+        final quantity = _productQuantities[productId] ?? 0;
+        if (quantity > 0) {
+          dashboardProducts.add({
+            'name': product['name'],
+            'pricePerUnit': product['price'],
+            'totalPrice': product['price'], // Se calculará en el carrito
+            'image': product['image'],
+            'id': productId,
+            'quantity': quantity,
+          });
+        }
+      }
+    }
+
+    // Navegar al carrito con los productos
+    Navigator.pushNamed(
+      context,
+      '/cart',
+      arguments: {
+        'dashboardProducts': dashboardProducts,
+        'dashboardFavoriteProducts': dashboardFavoritesToSend,
+        'currentPoints': _userPoints, // Enviar puntos actuales
+      },
+    );
+
+    // Limpiar las cantidades del dashboard después de enviar al carrito
+    setState(() {
+      _productQuantities.clear();
+    });
+  }
+
+  void _collectFavoriteProducts(
+    List<Map<String, dynamic>> productList,
+    List<Map<String, dynamic>> favoritesToSend,
+  ) {
+    for (var product in productList) {
+      final productId = '${product['name']}_${product['price']}';
+      if (_favoriteProducts.contains(productId)) {
+        favoritesToSend.add({
+          'name': product['name'],
+          'price': product['price'],
+          'image': product['image'],
+          'id': productId,
+        });
+      }
+    }
+  }
 }

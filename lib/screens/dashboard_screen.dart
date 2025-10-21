@@ -4,6 +4,7 @@ import 'offers_screen.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
 import 'package:fast_pedido/data/products_data.dart';
+import 'package:fast_pedido/data/session_state.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -62,41 +63,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
         toolbarHeight: 70,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 45,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+            // 🔹 Logo + texto
+            Row(
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 45,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.delivery_dining,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'FastPedido',
+                  style: TextStyle(
                     color: Colors.red,
-                    borderRadius: BorderRadius.circular(8),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.red,
+                    decorationThickness: 2.5,
                   ),
-                  child: const Icon(
-                    Icons.delivery_dining,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                );
-              },
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            const Text(
-              'FastPedido',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.red,
-                decorationThickness: 2.5,
+
+            // 🔹 Botón dinámico de sesión
+            ElevatedButton(
+              onPressed: () async {
+                if (SessionState.isLoggedIn) {
+                  Navigator.pushNamed(context, '/profile');
+                } else {
+                  // Cuando el login termine, refrescamos el dashboard
+                  await Navigator.pushNamed(context, '/login');
+                  setState(() {}); // 🔁 Refresca el botón al volver
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: SessionState.isLoggedIn
+                    ? Colors.green
+                    : Colors.red,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                SessionState.isLoggedIn ? 'Mi cuenta' : 'Sign in',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,11 +566,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+
+        // ✅ CAMBIO AQUÍ: de ListView a GridView
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GridView.builder(
+            shrinkWrap: true, // importante para evitar overflow
+            physics:
+                const NeverScrollableScrollPhysics(), // el scroll lo maneja el SingleChildScrollView padre
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // 👉 2 columnas
+              crossAxisSpacing: 12, // separación horizontal
+              mainAxisSpacing: 12, // separación vertical
+              childAspectRatio: 0.75, // altura relativa de cada tarjeta
+            ),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
@@ -539,7 +589,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               return ProductCard(
                 product: product,
-                fullWidth: false,
+                fullWidth:
+                    true, // puede ser false si quieres tarjetas más compactas
                 quantity: quantity,
                 isFavorite: isFavorite,
                 onAdd: () {
