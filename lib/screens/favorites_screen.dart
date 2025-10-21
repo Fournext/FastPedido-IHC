@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
+import 'package:fast_pedido/data/products_data.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -24,48 +25,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return total;
   }
 
-  final List<Map<String, dynamic>> favoriteProducts = [
-    {
-      'name': 'Gaseosa Pepsi\n500 Ml',
-      'price': 'Bs. 8.00',
-      'image': 'assets/images/favoritos/pepsi.png',
-    },
-    {
-      'name': 'Papas Pringles\nOriginal 124 gr',
-      'price': 'Bs. 49.00',
-      'image': 'assets/images/favoritos/pringles.png',
-    },
-    {
-      'name': 'Takis Fuego\nMax 240 gr',
-      'price': 'Bs. 43.00',
-      'image': 'assets/images/favoritos/takis.png',
-    },
-    {
-      'name': 'Popcorn ACT II\nMantequilla\n99 gr',
-      'price': 'Bs. 20.50',
-      'image': 'assets/images/favoritos/popcorn.png',
-    },
-    {
-      'name': 'Whisky Black\nLabel 750 ml',
-      'price': 'Bs. 525.00',
-      'image': 'assets/images/favoritos/whisky.png',
-    },
-    {
-      'name': 'Singani Casa\nReal Etiqueta\nNegra 1 L',
-      'price': 'Bs. 98.00',
-      'image': 'assets/images/favoritos/singani.png',
-    },
-    {
-      'name': 'Paneton\nHuereñito\nChocolate 600 g',
-      'price': 'Bs. 39.90',
-      'image': 'assets/images/favoritos/paneton.png',
-    },
-    {
-      'name': 'Leche\nChocolatosa\nPil 800 ml',
-      'price': 'Bs. 16.80',
-      'image': 'assets/images/favoritos/leche.png',
-    },
-  ];
+  // Usar datos centralizados
+  List<Map<String, dynamic>> get favoriteProducts =>
+      ProductsData.favoriteProducts;
 
   @override
   void initState() {

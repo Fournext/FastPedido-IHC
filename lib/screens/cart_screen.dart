@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
+import 'package:fast_pedido/data/products_data.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -57,23 +58,8 @@ class _CartScreenState extends State<CartScreen> {
     return _totalPoints;
   }
 
-  final List<Map<String, dynamic>> suggestions = [
-    {
-      'name': 'Carne molida\nde segunda',
-      'price': 'Bs. 53.10',
-      'image': 'assets/images/carne_molida.png',
-    },
-    {
-      'name': 'Jugo Aquarius Pera 3 L',
-      'price': 'Bs. 20.00',
-      'image': 'assets/images/aquario.png',
-    },
-    {
-      'name': 'Detergente Polvo Omo Limon 1800 gr',
-      'price': 'Bs. 59.90',
-      'image': 'assets/images/detergente.png',
-    },
-  ];
+  // Usar datos centralizados
+  List<Map<String, dynamic>> get suggestions => ProductsData.suggestions;
 
   double get totalAmount {
     double total = 0.0;

@@ -1,5 +1,5 @@
 import 'package:fast_pedido/widgets/bottom_menu.dart';
-
+import 'package:fast_pedido/data/products_data.dart';
 import 'package:flutter/material.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -13,75 +13,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
   int _cartItemCount = 0;
   int _expandedOrderIndex = -1;
 
-  final List<Map<String, dynamic>> orders = [
-    {
-      'orderNumber': '116452',
-      'branch': 'Sucursal: Hiper del 2do anillo',
-      'requestDate': '15-10-2025',
-      'deliveryDate': '08-11-2025',
-      'deliveryTime': '17:00',
-      'products': [
-        {
-          'name': 'Coca Cola 3 lts',
-          'price': 'Bs. 45',
-          'weight': '15 bs',
-          'quantity': 3,
-        },
-        {
-          'name':
-              'Papel Higiénico Scott de 3 Capas\nFull algodón de 6 unidades',
-          'price': 'Bs. 30',
-          'weight': '15 bs',
-          'quantity': 2,
-        },
-      ],
-      'totalPartial': 'Bs. 75',
-      'shippingCost': 'Bs. 10',
-      'totalCost': 'Bs. 85',
-    },
-    {
-      'orderNumber': '116452',
-      'branch': 'Sucursal: Hiper del 2do anillo',
-      'requestDate': '08-09-2025',
-      'deliveryDate': '10-09-2025',
-      'deliveryTime': '09:30',
-      'products': [
-        {
-          'name': 'Leche Pil 1L',
-          'price': 'Bs. 12',
-          'weight': '10 bs',
-          'quantity': 2,
-        },
-      ],
-      'totalPartial': 'Bs. 24',
-      'shippingCost': 'Bs. 8',
-      'totalCost': 'Bs. 32',
-    },
-    {
-      'orderNumber': '116452',
-      'branch': 'Sucursal: Hiper del 2do anillo',
-      'requestDate': '04-07-2025',
-      'deliveryDate': '06-07-2025',
-      'deliveryTime': '14:00',
-      'products': [
-        {
-          'name': 'Arroz Superior 1kg',
-          'price': 'Bs. 18',
-          'weight': '12 bs',
-          'quantity': 1,
-        },
-        {
-          'name': 'Aceite 123 500ml',
-          'price': 'Bs. 25',
-          'weight': '8 bs',
-          'quantity': 1,
-        },
-      ],
-      'totalPartial': 'Bs. 43',
-      'shippingCost': 'Bs. 12',
-      'totalCost': 'Bs. 55',
-    },
-  ];
+  // Usar datos centralizados
+  List<Map<String, dynamic>> get orders => ProductsData.orders;
 
   @override
   Widget build(BuildContext context) {

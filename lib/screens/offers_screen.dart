@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fast_pedido/data/products_data.dart';
 
 class OffersScreen extends StatefulWidget {
   const OffersScreen({super.key});
@@ -11,52 +12,8 @@ class _OffersScreenState extends State<OffersScreen> {
   Set<String> _favoriteProducts = {};
   Map<String, int> _productQuantities = {};
 
-  // Lista extendida de ofertas (puedes agregar más productos aquí)
-  final List<Map<String, dynamic>> allOffers = [
-    {
-      'name': 'Carne molida\nde segunda',
-      'price': 'Bs. 48.38',
-      'originalPrice': 'Bs. 59.00',
-      'discount': '18%',
-      'image': 'assets/images/ofertas/carnemolidasegunda.png',
-    },
-    {
-      'name': 'Cereal Chocapic \nNestle Cja 540G',
-      'price': 'Bs. 73.60',
-      'originalPrice': 'Bs. 92.00',
-      'discount': '20%',
-      'image': 'assets/images/ofertas/chocapic400.png',
-    },
-    {
-      'name': 'Gaseosa Coca Cola \nOriginal 2 L',
-      'price': 'Bs. 12.33',
-      'originalPrice': 'Bs. 13.70',
-      'discount': '10%',
-      'image': 'assets/images/ofertas/cocacola2l.png',
-    },
-    // Puedes agregar más ofertas aquí
-    {
-      'name': 'Aceite Oliva Kris \nExtra Virgen 1 L',
-      'price': 'Bs. 186.44',
-      'originalPrice': 'Bs. 236.00',
-      'discount': '21%',
-      'image': 'assets/images/ofertas/aceiteolivia.png', // Usar imagen temporal
-    },
-    {
-      'name': 'Arroz Caisy \nGrano de Oro 5 kg',
-      'price': 'Bs. 59,28',
-      'originalPrice': 'Bs. 76.00',
-      'discount': '23%',
-      'image': 'assets/images/ofertas/arroz.png', // Usar imagen temporal
-    },
-    {
-      'name': 'Pasta Dental Colgate \nCarbon Activado \n150 ml',
-      'price': 'Bs. 35.99',
-      'originalPrice': 'Bs. 43.90',
-      'discount': '18%',
-      'image': 'assets/images/ofertas/pastadental.png', // Usar imagen temporal
-    },
-  ];
+  // Usar datos centralizados de ofertas
+  List<Map<String, dynamic>> get allOffers => ProductsData.allOffers;
 
   @override
   Widget build(BuildContext context) {

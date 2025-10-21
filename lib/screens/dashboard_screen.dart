@@ -3,6 +3,7 @@ import 'package:fast_pedido/screens/Recommended_screen.dart';
 import 'offers_screen.dart';
 import 'package:fast_pedido/widgets/bottom_menu.dart';
 import 'package:fast_pedido/widgets/product_card.dart';
+import 'package:fast_pedido/data/products_data.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -45,174 +46,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  final List<Map<String, dynamic>> categories = [
-    {'name': 'Verduras', 'image': 'assets/images/categoria/verduras.png'},
-    {'name': 'Carnes', 'image': 'assets/images/categoria/carnes.png'},
-    {'name': 'Lácteos', 'image': 'assets/images/categoria/lacteos.png'},
-  ];
-
-  final Map<String, List<Map<String, dynamic>>> productsByCategory = {
-    'Verduras': [
-      {
-        'name': 'Lechuga',
-        'price': 'Bs. 8.50',
-        'image': 'assets/images/verduras/lechuga.jpg',
-      },
-      {
-        'name': 'Tomate',
-        'price': 'Bs. 6.00',
-        'image': 'assets/images/verduras/tomate.png',
-      },
-      {
-        'name': 'Zanahoria',
-        'price': 'Bs. 5.50',
-        'image': 'assets/images/verduras/zanahoria.png',
-      },
-      {
-        'name': 'Cebolla',
-        'price': 'Bs. 4.00',
-        'image': 'assets/images/verduras/cebolla.png',
-      },
-    ],
-    'Carnes': [
-      {
-        'name': 'Carne Molida de Primera',
-        'price': 'Bs. 82.00',
-        'image': 'assets/images/carnes/carnemolida.png',
-      },
-      {
-        'name': 'Filete de Pechuga Sofia 1 kg Bandeja',
-        'price': 'Bs. 56.90',
-        'image': 'assets/images/carnes/filete_pollo_1kg.png',
-      },
-      {
-        'name': 'Picaña Frigor al Vacio kg',
-        'price': 'Bs. 166.00',
-        'image': 'assets/images/carnes/picaña_frigor.png',
-      },
-      {
-        'name': 'Pollo Frial Entero Sofia kg',
-        'price': 'Bs. 24.90',
-        'image': 'assets/images/carnes/pollo_frial.png',
-      },
-      {
-        'name': 'Silpancho kg',
-        'price': 'Bs. 66.00',
-        'image': 'assets/images/carnes/silpancho_procesado.png',
-      },
-      {
-        'name': 'Milanesa de Pollo kg',
-        'price': 'Bs. 66.00',
-        'image': 'assets/images/carnes/milanesa.png',
-      },
-    ],
-    'Lácteos': [
-      {
-        'name': 'Nueva Leche Pil Deslactosada 800 ml',
-        'price': 'Bs. 9.90',
-        'image': 'assets/images/lacteos/leche_delactosada_pil.png',
-      },
-      {
-        'name': 'Mantequilla Pil Con Sal 200 gr',
-        'price': 'Bs. 24.50',
-        'image': 'assets/images/lacteos/mamtequilla_pil_conSal_200gr.png',
-      },
-      {
-        'name': 'Dulce de Leche Pil 500 gr',
-        'price': 'Bs. 25.00',
-        'image': 'assets/images/lacteos/dulce_leche_pil.png',
-      },
-      {
-        'name': 'Yogurt Pil Bebible Frutilla 1 L',
-        'price': 'Bs. 16.90',
-        'image': 'assets/images/lacteos/yogurt_bebible_1lt.png',
-      },
-      {
-        'name': 'Yogurt Griego Delizia Sabor Fresa 170 gr',
-        'price': 'Bs. 9.30',
-        'image': 'assets/images/lacteos/yogurt_griego.png',
-      },
-      {
-        'name': 'Queso San German Yapacani un',
-        'price': 'Bs. 75.00',
-        'image': 'assets/images/lacteos/queso_yapacani.png',
-      },
-    ],
-  };
-
-  final List<Map<String, dynamic>> offers = [
-    {
-      'name': 'Carne molida\nde segunda',
-      'price': 'Bs. 53.10',
-      'originalPrice': 'Bs. 65.00',
-      'discount': '18%',
-      'image': 'assets/images/ofertas/carnemolidasegunda.png',
-    },
-    {
-      'name': 'Cereal Nestle\nChocapic\n250gr',
-      'price': 'Bs. 46.80',
-      'originalPrice': 'Bs. 58.50',
-      'discount': '20%',
-      'image': 'assets/images/ofertas/chocapic.png',
-    },
-    {
-      'name': 'Gaseosa\nCoca Cola de\n3lt',
-      'price': 'Bs. 18.00',
-      'originalPrice': 'Bs. 22.50',
-      'discount': '20%',
-      'image': 'assets/images/ofertas/cocacola3l.png',
-    },
-  ];
-
-  final List<Map<String, dynamic>> recommended = [
-    {
-      'name': 'Cerveza\nPaceña Lata\n269 ml CBX',
-      'price': 'Bs. 7.40',
-      'image': 'assets/images/recomendacion/cerveza.png',
-    },
-    {
-      'name': 'Cereales\nLucky Charms',
-      'price': 'Bs. 69.00',
-      'image': 'assets/images/recomendacion/cereales.png',
-    },
-    {
-      'name': 'Nutella',
-      'price': 'Bs. 176.00',
-      'image': 'assets/images/recomendacion/nutella.png',
-    },
-
-    {
-      'name': 'Gaseosa Coca Cola Clasica Pack 6 un 300 ml',
-      'price': 'Bs. 19.00',
-      'image': 'assets/images/recomendacion/coca_pack.png',
-    },
-    {
-      'name': 'Gaseosa Coca Cola Original Two Pack 3 L',
-      'price': 'Bs. 38.00',
-      'image': 'assets/images/recomendacion/coca_3lt.png',
-    },
-    {
-      'name': 'Whisky Johnnie Walker Black Label 1 L',
-      'price': 'Bs. 670.00',
-      'image': 'assets/images/recomendacion/wisky.png',
-    },
-
-    {
-      'name': 'Whisky Johnnie Walker Swing 750 ml',
-      'price': 'Bs. 885.00',
-      'image': 'assets/images/recomendacion/wiskyW.png',
-    },
-    {
-      'name': 'Hamburguesa Hipermaxi Carne 6 un',
-      'price': 'Bs. 31.90',
-      'image': 'assets/images/recomendacion/hamburguesa.png',
-    },
-    {
-      'name': 'Helado Delizia Chocolate 1 L',
-      'price': 'Bs. 26.50',
-      'image': 'assets/images/recomendacion/helado.png',
-    },
-  ];
+  // Datos centralizados desde ProductsData
+  List<Map<String, dynamic>> get categories => ProductsData.categories;
+  Map<String, List<Map<String, dynamic>>> get productsByCategory =>
+      ProductsData.productsByCategory;
+  List<Map<String, dynamic>> get offers => ProductsData.offers;
+  List<Map<String, dynamic>> get recommended => ProductsData.recommended;
 
   @override
   Widget build(BuildContext context) {
@@ -481,6 +320,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _favoriteProducts.add(productId);
                           }
                         });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isFavorite
+                                  ? '${product['name']} eliminado de favoritos'
+                                  : '${product['name']} agregado a favoritos',
+                            ),
+                            duration: const Duration(seconds: 1),
+                            backgroundColor: isFavorite
+                                ? Colors.orange
+                                : Colors.green,
+                          ),
+                        );
                       },
                     );
                   },
@@ -559,6 +411,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 _favoriteProducts.add(productId);
                               }
                             });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isFavorite
+                                      ? '${product['name']} eliminado de favoritos'
+                                      : '${product['name']} agregado a favoritos',
+                                ),
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: isFavorite
+                                    ? Colors.orange
+                                    : Colors.green,
+                              ),
+                            );
                           },
                         );
                       },
@@ -701,6 +566,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _favoriteProducts.add(productId);
                     }
                   });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isFavorite
+                            ? '${product['name']} eliminado de favoritos'
+                            : '${product['name']} agregado a favoritos',
+                      ),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: isFavorite
+                          ? Colors.orange
+                          : Colors.green,
+                    ),
+                  );
                 },
               );
             },
