@@ -525,11 +525,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+
+        // ✅ CAMBIO AQUÍ: de ListView a GridView
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GridView.builder(
+            shrinkWrap: true, // importante para evitar overflow
+            physics:
+                const NeverScrollableScrollPhysics(), // el scroll lo maneja el SingleChildScrollView padre
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // 👉 2 columnas
+              crossAxisSpacing: 12, // separación horizontal
+              mainAxisSpacing: 12, // separación vertical
+              childAspectRatio: 0.75, // altura relativa de cada tarjeta
+            ),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
@@ -539,7 +548,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               return ProductCard(
                 product: product,
-                fullWidth: false,
+                fullWidth:
+                    true, // puede ser false si quieres tarjetas más compactas
                 quantity: quantity,
                 isFavorite: isFavorite,
                 onAdd: () {
